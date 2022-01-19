@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  dev-shm-product-svc:
+    container_name: dev-shm-product-svc
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '9005:9005'
+    networks:
+      - shoesmart-dev
+
+networks:
+  shoesmart-dev:
+    external: true
