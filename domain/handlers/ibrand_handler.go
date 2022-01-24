@@ -15,5 +15,7 @@ type IBrandHandler interface {
 
 	Delete(ctx *fiber.Ctx) (err error)
 
+	Banned(ctx *fiber.Ctx) (err error)
+
 	Export(ctx *fiber.Ctx) (err error)
 }

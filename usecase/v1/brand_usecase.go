@@ -178,3 +178,43 @@ func (uc BrandUsecase) Delete(brandID uuid.UUID) (err error) {
 func (uc BrandUsecase) Export(fileType string) (err error) {
 	panic("Under Maintenance")
 }
+
+func (uc BrandUsecase) Banned(req *request.BannedBrandRequest, brandID uuid.UUID) (res view_models.BrandDetailVm, err error) {
+	db := uc.DB
+	repo := command.NewCommandBrandRepository(db)
+
+	userId, err := uuid.Parse(uc.UserID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "parse-userId-toUuid")
+		return res, err
+	}
+
+	model := models.Brand{
+		ID:     brandID,
+		Status: req.Status,
+	}
+	if req.Status == "Banned" {
+		model.BannedReason = req.Reason
+		model.BannedDocumentID = req.DocID
+		model.BannedBy = &userId
+	} else {
+		model.UnbannedReason = req.Reason
+		model.UnbannedDocummentID = req.DocID
+		model.UnbannedBy = &userId
+	}
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
+		return res, err
+	}
+	banned, err := repo.Update(model, tx)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-banned-brand")
+		return res, err
+	}
+
+	res = view_models.NewBrandVm().BuildDetail(&banned)
+	tx.Commit()
+	return res, nil
+}

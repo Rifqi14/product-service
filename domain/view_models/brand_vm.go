@@ -1,8 +1,9 @@
 package view_models
 
 import (
+	fileModel "gitlab.com/s2.1-backend/shm-file-management-svc/domain/models"
+	"gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
-	"gorm.io/gorm"
 )
 
 type BrandListVm struct {
@@ -25,6 +26,13 @@ type BrandDetailVm struct {
 	EstablishedDate string               `json:"established_date"`
 	About           string               `json:"about"`
 	Platform        []BrandMediaSocialVm `json:"platform"`
+	Banned          BrandBannedVm        `json:"banned_status"`
+}
+
+type BrandBannedVm struct {
+	Status   string             `json:"status"`
+	Reason   string             `json:"reason"`
+	Document view_models.FileVm `json:"supporting_documment"`
 }
 
 type BrandVm struct {
@@ -44,7 +52,7 @@ func (vm BrandVm) BuildList(model []models.Brand) (res []BrandListVm) {
 			Name:   brand.Name,
 			Logo:   brand.LogoID.String(),
 			Owner:  brand.Title,
-			Status: buildStatus(brand.DeletedAt),
+			Status: brand.Status,
 		})
 	}
 	return res
@@ -62,12 +70,23 @@ func (vm BrandVm) BuildDetail(brand *models.Brand) BrandDetailVm {
 		EstablishedDate: brand.EstablishedDate.Format("02-10-2006"),
 		About:           brand.About,
 		Platform:        NewBrandMediaSocialVm().Build(brand.MediaSocials),
+		Banned:          vm.BuildBanned(brand),
 	}
 }
 
-func buildStatus(deletedAt gorm.DeletedAt) (status string) {
-	if deletedAt.Valid {
-		return "Non-Active"
+func (vm BrandVm) BuildBanned(brand *models.Brand) BrandBannedVm {
+	var reason string
+	var doc fileModel.File
+	if brand.Status == "Banned" {
+		reason = brand.BannedReason
+		doc = brand.BannedDocument
+	} else {
+		reason = brand.UnbannedReason
+		doc = brand.BannedDocument
 	}
-	return "Active"
+	return BrandBannedVm{
+		Status:   brand.Status,
+		Reason:   reason,
+		Document: view_models.NewFileVm().Build(doc),
+	}
 }

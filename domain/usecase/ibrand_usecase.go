@@ -18,4 +18,6 @@ type IBrandUsecase interface {
 	Delete(ID uuid.UUID) (err error)
 
 	Export(fileType string) (err error)
+
+	Banned(req *request.BannedBrandRequest, brandID uuid.UUID) (res view_models.BrandDetailVm, err error)
 }

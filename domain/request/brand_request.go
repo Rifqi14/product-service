@@ -15,3 +15,9 @@ type BrandRequest struct {
 	About           string                    `form:"about" json:"about"`
 	MediaSocial     []BrandMediaSocialRequest `form:"media_social" json:"media_social"`
 }
+
+type BannedBrandRequest struct {
+	Status string     `form:"status" json:"status" validate:"required"`
+	Reason string     `form:"reason" json:"reason" validate:"required"`
+	DocID  *uuid.UUID `form:"documment_id" json:"document_id"`
+}

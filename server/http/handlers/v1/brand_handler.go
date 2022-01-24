@@ -114,3 +114,25 @@ func (handler BrandHandler) Delete(ctx *fiber.Ctx) (err error) {
 func (handler BrandHandler) Export(ctx *fiber.Ctx) (err error) {
 	panic("Under Maintenance")
 }
+
+func (handler BrandHandler) Banned(ctx *fiber.Ctx) (err error) {
+	brandId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
+	}
+	req := new(request.BannedBrandRequest)
+	if err := ctx.BodyParser(req); err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
+	}
+	if err := handler.Validate.Struct(req); err != nil {
+		return responses.NewResponse(responses.ResponseErrorValidation(nil, nil, http.StatusBadRequest, "error validate payload", err.(validator.ValidationErrors))).Send(ctx)
+	}
+
+	uc := v1.NewBrandUsecase(handler.UcContract)
+	res, err := uc.Banned(req, brandId)
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataStoredError, err)).Send(ctx)
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, messages.DataStored)).Send(ctx)
+}

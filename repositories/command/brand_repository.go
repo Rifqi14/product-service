@@ -23,13 +23,15 @@ func (BrandRepository) Create(brand models.Brand, tx *gorm.DB) (res models.Brand
 }
 
 func (BrandRepository) Update(brand models.Brand, tx *gorm.DB) (res models.Brand, err error) {
-	err = tx.Updates(&brand).Error
+	err = tx.Preload("MediaSocials").Preload("BannedDocument").Preload("UnbannedDocument").Updates(&brand).Error
 	if err != nil {
 		return res, err
 	}
-	err = tx.Model(&brand).Association("MediaSocials").Replace(brand.MediaSocials)
-	if err != nil {
-		return res, err
+	if len(brand.MediaSocials) > 0 {
+		err = tx.Model(&brand).Association("MediaSocials").Replace(brand.MediaSocials)
+		if err != nil {
+			return res, err
+		}
 	}
 	return brand, nil
 }
