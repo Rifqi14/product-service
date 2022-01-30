@@ -11,10 +11,10 @@ type ColorListVm struct {
 }
 
 type ColorDetailVm struct {
-	ID     string `json:"color_id"`
-	Name   string `json:"name"`
-	Hex    string `json:"hex"`
-	Parent *ColorParentVm
+	ID     string         `json:"color_id"`
+	Name   string         `json:"name"`
+	Hex    string         `json:"hex"`
+	Parent *ColorParentVm `json:"color_parent"`
 }
 
 type ColorParentVm struct {

@@ -3,12 +3,16 @@ module gitlab.com/s2.1-backend/shm-product-svc
 go 1.17
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/go-playground/locales v0.14.0
 	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-playground/validator/v10 v10.10.0
+	github.com/go-redis/redis/v7 v7.4.1
 	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/gofiber/jwt/v2 v2.2.7
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.4.0
+	gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220122050357-98f4fa5a11a2
 	gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20220118071751-50c484663232
 	gorm.io/gorm v1.22.5
 )
@@ -16,10 +20,7 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/go-chi/chi v4.0.2+incompatible // indirect
-	github.com/go-playground/locales v0.14.0 // indirect
-	github.com/go-redis/redis/v7 v7.4.1 // indirect
 	github.com/golang-jwt/jwt/v4 v4.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.0 // indirect

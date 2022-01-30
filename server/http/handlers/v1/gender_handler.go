@@ -49,7 +49,7 @@ func (handler GenderHandler) List(ctx *fiber.Ctx) (err error) {
 		return responses.NewResponse(responses.ResponseErrorValidation(nil, nil, http.StatusBadRequest, "validasi data error", err.(validator.ValidationErrors))).Send(ctx)
 	}
 
-	uc := v1.NewColorUsecase(handler.UcContract)
+	uc := v1.NewGenderUsecase(handler.UcContract)
 	data, meta, err := uc.List(req)
 	if err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
