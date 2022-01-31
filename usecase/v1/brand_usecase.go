@@ -199,7 +199,7 @@ func (uc BrandUsecase) Banned(req *request.BannedBrandRequest, brandID uuid.UUID
 		model.BannedBy = &userId
 	} else {
 		model.UnbannedReason = req.Reason
-		model.UnbannedDocummentID = req.DocID
+		model.UnbannedDocumentID = req.DocID
 		model.UnbannedBy = &userId
 	}
 	tx := db.Begin()

@@ -172,12 +172,8 @@ github.com/valyala/fasthttp v1.31.0/go.mod h1:2rsYD01CKFrjjsvFxx75KlEUNpWNBY9JWD
 github.com/valyala/tcplisten v1.0.0 h1:rBHj/Xf+E1tRGZyWIWwJDiRY0zc1Js+CV5DqwacVSA8=
 github.com/valyala/tcplisten v1.0.0/go.mod h1:T0xQ8SeCZGxckz9qRXTfG43PvQ/mcWh7FwZEA7Ioqkc=
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
-gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220119033359-b5edb8dfe7de h1:kK6LKRj16D9seE+aKr1Mj+lyxbhClFSZuGQkgq7u0SY=
-gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220119033359-b5edb8dfe7de/go.mod h1:lmdeOtewYoskQxN6ArCqPX4Akc9EcU4LwSqqbcy9n9c=
 gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220122050357-98f4fa5a11a2 h1:U750XhYydBcRr9YfnqtjKovD4/TN+WyBZR59Ig3A/aU=
 gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220122050357-98f4fa5a11a2/go.mod h1:Dsp7gGfrCtWh57O+utFOu09MkviqrwKafvfQtEj+1V0=
-gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20211229094751-b79f38dfc548 h1:AYcDmsPMGuPWgqrIgw71QMhYXeSz2Z94yO1CSGNUykg=
-gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20211229094751-b79f38dfc548/go.mod h1:K2ZFLLLgQ2BQVFQ1iJGSZkz8KD+4OyQ9sfiWNXiema0=
 gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20220118071751-50c484663232 h1:s6tzeoPNgcIVKtpYOSOdQiApsEvmiUrM9VSz73vbWf8=
 gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20220118071751-50c484663232/go.mod h1:K2ZFLLLgQ2BQVFQ1iJGSZkz8KD+4OyQ9sfiWNXiema0=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
