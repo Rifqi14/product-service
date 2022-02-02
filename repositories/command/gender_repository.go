@@ -34,6 +34,10 @@ func (repo GenderRepository) Update(gender models.Gender) (res models.Gender, er
 
 func (repo GenderRepository) Delete(gender models.Gender) (err error) {
 	tx := repo.DB
+	err = tx.Updates(&gender).Error
+	if err != nil {
+		return err
+	}
 	err = tx.Delete(&gender).Error
 	if err != nil {
 		return err

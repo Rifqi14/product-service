@@ -9,4 +9,6 @@ type IGenderRepository interface {
 	List(search, orderBy, sort string, limit, offset int64) (res []models.Gender, count int64, err error)
 
 	Detail(genderId uuid.UUID) (res models.Gender, err error)
+
+	Parent(parentId uuid.UUID) (res []models.Gender, err error)
 }

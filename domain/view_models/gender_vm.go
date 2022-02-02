@@ -3,7 +3,6 @@ package view_models
 import "gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 
 type GenderListVm struct {
-	No     int64  `json:"no"`
 	Parent string `json:"parent"`
 	Child  string `json:"child"`
 	ID     string `json:"gender_id"`
@@ -30,10 +29,13 @@ func NewGenderVm() GenderVm {
 }
 
 func (vm GenderVm) BuildList(genders []models.Gender) (res []GenderListVm) {
-	for i, gender := range genders {
+	for _, gender := range genders {
+		var parent string
+		if gender.Parent != nil {
+			parent = gender.Parent.Name
+		}
 		res = append(res, GenderListVm{
-			No:     int64(i + 1),
-			Parent: gender.Parent.Name,
+			Parent: parent,
 			Child:  gender.Name,
 			ID:     gender.ID.String(),
 		})
@@ -49,9 +51,12 @@ func (vm GenderVm) BuildDetail(gender *models.Gender) GenderDetailVm {
 	}
 }
 
-func (vm GenderVm) BuildParent(parent *models.Gender) *GenderParentVm {
-	return &GenderParentVm{
-		ID:   parent.ID.String(),
-		Name: parent.Name,
+func (vm GenderVm) BuildParent(parent *models.Gender) (res *GenderParentVm) {
+	if parent != nil {
+		res = &GenderParentVm{
+			ID:   parent.ID.String(),
+			Name: parent.Name,
+		}
 	}
+	return res
 }
