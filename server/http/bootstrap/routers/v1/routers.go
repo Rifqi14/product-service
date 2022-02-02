@@ -36,4 +36,10 @@ func (routers Routers) ProductRoute() {
 		Handler:    routers.Handler,
 	}
 	genderRoutes.GenderRoute()
+
+	labelRoutes := LabelRouters{
+		RouteGroup: apiV1,
+		Handler:    routers.Handler,
+	}
+	labelRoutes.LabelRoute()
 }

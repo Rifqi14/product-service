@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
@@ -48,9 +50,24 @@ func (uc LabelUsecase) Create(req *request.LabelRequest) (res view_models.LabelD
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-create-label")
 		return res, err
 	}
+	var dataPath []string
+	path, err := uc.createPath(&label.ID, dataPath)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-label")
+		return res, err
+	}
+	label.Path = strings.Join(path, " / ")
+	label.Level = int64(len(path))
+	err = tx.Save(&label).Error
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-label")
+		return res, err
+	}
 
-	res = view_models.NewLabelVm().BuildDetail(&label)
 	tx.Commit()
+	res, _ = uc.Detail(label.ID)
 	return res, nil
 }
 
@@ -76,13 +93,16 @@ func (uc LabelUsecase) Detail(labelId uuid.UUID) (res view_models.LabelDetailVm,
 	db := uc.DB
 	repo := query.NewQueryLabelRepository(db)
 
-	gender, err := repo.Detail(labelId)
+	label, err := repo.Detail(labelId)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-detail-label")
 		return res, err
 	}
 
-	res = view_models.NewLabelVm().BuildDetail(&gender)
+	if label != nil {
+		res = view_models.NewLabelVm().BuildDetail(label)
+	}
+
 	return res, nil
 }
 
@@ -114,8 +134,29 @@ func (uc LabelUsecase) Update(req *request.LabelRequest, labelId uuid.UUID) (res
 		return res, err
 	}
 
-	res = view_models.NewLabelVm().BuildDetail(&label)
+	var dataPath []string
+	path, err := uc.createPath(&label.ID, dataPath)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-label")
+		return res, err
+	}
+	label.Path = strings.Join(path, " / ")
+	label.Level = int64(len(path))
+	err = tx.Updates(&label).Error
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-label")
+		return res, err
+	}
+	err = uc.updatePath(label.ID)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-transaction")
+		return res, err
+	}
+
 	tx.Commit()
+	res, _ = uc.Detail(label.ID)
 	return res, nil
 }
 
@@ -150,4 +191,66 @@ func (uc LabelUsecase) Delete(labelId uuid.UUID) (err error) {
 
 func (uc LabelUsecase) Export(fileType string) (err error) {
 	panic("Under development")
+}
+
+func (uc LabelUsecase) createPath(labelId *uuid.UUID, path []string) (paths []string, err error) {
+	repo := query.NewQueryLabelRepository(uc.DB)
+
+	label, err := repo.Detail(*labelId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-detail-label")
+		return nil, err
+	}
+	path = append([]string{label.Name}, path...)
+	if label.Parent != nil {
+		path, err := uc.createPath(label.ParentID, path)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-label")
+			return nil, err
+		}
+		return path, nil
+	}
+	return path, nil
+}
+
+func (uc LabelUsecase) updatePath(labelId uuid.UUID) error {
+	db := uc.DB
+	queryRepo := query.NewQueryLabelRepository(db)
+	commandRepo := command.NewCommandLabelRepository(db)
+
+	labels, err := queryRepo.Parent(labelId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-label")
+		return err
+	}
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
+		return err
+	}
+	for _, label := range labels {
+		var parentPath []string
+		path, _ := uc.createPath(&label.ID, parentPath)
+		userId := uuid.MustParse(uc.UserID)
+		model := models.Label{
+			ID:        label.ID,
+			Path:      strings.Join(path, " / "),
+			Level:     int64(len(path)),
+			UpdatedBy: &userId,
+		}
+		_, err := commandRepo.Update(model)
+		if err != nil {
+			tx.Rollback()
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-label")
+			return err
+		}
+		err = uc.updatePath(label.ID)
+		if err != nil {
+			tx.Rollback()
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-label")
+			return err
+		}
+	}
+	tx.Commit()
+	return nil
 }
