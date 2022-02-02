@@ -25,7 +25,7 @@ func (repo CategoryRepository) Create(category models.Category) (res models.Cate
 
 func (repo CategoryRepository) Update(category models.Category) (res models.Category, err error) {
 	tx := repo.DB
-	err = tx.Preload("Childs.Childs.Childs").Preload("Parent.Parent.Parent").Updates(&category).Error
+	err = tx.Preload("Parent.Parent.Parent").Updates(&category).Error
 	if err != nil {
 		return res, err
 	}

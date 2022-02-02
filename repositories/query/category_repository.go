@@ -7,6 +7,7 @@ import (
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/repository/query"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type CategoryRepository struct {
@@ -21,17 +22,21 @@ func (repo CategoryRepository) List(search, orderBy, sort string, limit, offset 
 	tx := repo.DB
 	search = strings.ToLower(search)
 
-	err = tx.Preload("Parent", "LOWER(name) like ?", "%"+search+"%").Or("LOWER(categories.name) like ?", "%"+search+"%").Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Count(&count).Error
+	err = tx.Joins("LEFT JOIN categories as parent ON parent.id = categories.parent_id").Where("LOWER(categories.name) like ? OR LOWER(parent.name) like ?", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Error
+	if err != nil {
+		return res, count, err
+	}
+	err = tx.Joins("LEFT JOIN categories as parent ON parent.id = categories.parent_id").Where("LOWER(categories.name) like ? OR LOWER(parent.name) like ?", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Find(&models.Category{}).Count(&count).Error
 	if err != nil {
 		return res, count, err
 	}
 	return res, count, nil
 }
 
-func (repo CategoryRepository) Detail(categoryID uuid.UUID) (res models.Category, err error) {
+func (repo CategoryRepository) Detail(categoryID *uuid.UUID) (res models.Category, err error) {
 	tx := repo.DB
 
-	err = tx.Preload("Parent").Find(&res, "id = ?", categoryID).Error
+	err = tx.Preload(clause.Associations).Find(&res, "id = ?", categoryID).Error
 	if err != nil {
 		return res, err
 	}

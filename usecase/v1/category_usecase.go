@@ -54,7 +54,7 @@ func (uc CategoryUsecase) Create(req *request.CategoryRequest) (res view_models.
 		return res, err
 	}
 	var modulePath []string
-	path, err := uc.createPath(category.ID, modulePath)
+	path, err := uc.createPath(&category.ID, modulePath)
 	if err != nil {
 		tx.Rollback()
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-category")
@@ -69,8 +69,8 @@ func (uc CategoryUsecase) Create(req *request.CategoryRequest) (res view_models.
 		return res, err
 	}
 
-	res = view_models.NewCategoryVm().BuildDetail(&category)
 	tx.Commit()
+	res, _ = uc.Detail(category.ID)
 	return res, nil
 }
 
@@ -97,7 +97,7 @@ func (uc CategoryUsecase) Detail(categoryID uuid.UUID) (res view_models.Category
 	db := uc.DB
 	repository := query.NewQueryCategoryRepository(db)
 
-	category, err := repository.Detail(categoryID)
+	category, err := repository.Detail(&categoryID)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-detail-brand")
 		return res, err
@@ -139,29 +139,29 @@ func (uc CategoryUsecase) Update(req *request.CategoryRequest, categoryID uuid.U
 		return res, err
 	}
 
-	var modulePath []string
-	path, err := uc.createPath(categoryID, modulePath)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-transaction")
-		return res, err
-	}
-	category.Path = strings.Join(path[:], " -> ")
-	category.Level = int64(len(path))
-	err = db.Save(&category).Error
-	if err != nil {
-		tx.Rollback()
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-transaction")
-		return res, err
-	}
-	err = uc.updatePath(categoryID)
-	if err != nil {
-		tx.Rollback()
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-transaction")
-		return res, err
-	}
+	// var modulePath []string
+	// path, err := uc.createPath(&categoryID, modulePath)
+	// if err != nil {
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-transaction")
+	// 	return res, err
+	// }
+	// category.Path = strings.Join(path[:], " / ")
+	// category.Level = int64(len(path))
+	// err = db.Save(&category).Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-transaction")
+	// 	return res, err
+	// }
+	// err = uc.updatePath(categoryID)
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-transaction")
+	// 	return res, err
+	// }
 
-	res = view_models.NewCategoryVm().BuildDetail(&category)
 	tx.Commit()
+	res, _ = uc.Detail(category.ID)
 	return res, nil
 }
 
@@ -198,7 +198,7 @@ func (uc CategoryUsecase) Export(fileType string) (err error) {
 	panic("Under development")
 }
 
-func (uc CategoryUsecase) createPath(categoryId uuid.UUID, path []string) (paths []string, err error) {
+func (uc CategoryUsecase) createPath(categoryId *uuid.UUID, path []string) (paths []string, err error) {
 	repository := query.NewQueryCategoryRepository(uc.DB)
 
 	category, err := repository.Detail(categoryId)
@@ -208,7 +208,7 @@ func (uc CategoryUsecase) createPath(categoryId uuid.UUID, path []string) (paths
 	}
 	path = append([]string{category.Name}, path...)
 	if category.ParentID != nil {
-		path, err = uc.createPath(*category.ParentID, path)
+		path, err = uc.createPath(category.ParentID, path)
 		if err != nil {
 			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-category")
 			return nil, err
@@ -235,7 +235,7 @@ func (uc CategoryUsecase) updatePath(categoryId uuid.UUID) error {
 	}
 	for _, category := range categories {
 		var categoryPath []string
-		path, _ := uc.createPath(category.ID, categoryPath)
+		path, _ := uc.createPath(&category.ID, categoryPath)
 		model := models.Category{
 			ID:    category.ID,
 			Path:  strings.Join(path, " / "),

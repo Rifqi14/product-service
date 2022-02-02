@@ -6,7 +6,6 @@ import (
 )
 
 type CategoryListVm struct {
-	No     int64              `json:"no"`
 	Parent string             `json:"parent_category"`
 	Child  string             `json:"child_category"`
 	Banner view_models.FileVm `json:"banner"`
@@ -42,36 +41,63 @@ type CategoryVm struct {
 	Media  CategoryMediaVm  `json:"media_category"`
 }
 
-func NewCategoryVm() CategoryVm {
-	return CategoryVm{}
+func NewCategoryVm() *CategoryVm {
+	return &CategoryVm{}
 }
 
 func (vm CategoryVm) BuildList(categories []models.Category) (res []CategoryListVm) {
-	for i, category := range categories {
+	for _, category := range categories {
+		var banner view_models.FileVm
+		var parent string
+		if category.MobileBanner != nil {
+			banner = view_models.NewFileVm().Build(*category.MobileBanner)
+		}
+		if category.Parent != nil {
+			parent = category.Parent.Name
+		}
 		res = append(res, CategoryListVm{
-			No:     int64(i + 1),
 			ID:     category.ID.String(),
-			Parent: category.Parent.Name,
+			Parent: parent,
 			Child:  category.Name,
-			Banner: view_models.NewFileVm().Build(*category.MobileBanner),
+			Banner: banner,
 		})
 	}
 	return res
 }
 
 func (vm CategoryVm) BuildDetail(category *models.Category) CategoryDetailVm {
+	var bannerMobile view_models.FileVm
+	var bannerWebsite view_models.FileVm
+	var heroMobile view_models.FileVm
+	var heroWebsite view_models.FileVm
+	var parent CategoryParentVm
+	if category.MobileBanner != nil {
+		bannerMobile = view_models.NewFileVm().Build(*category.MobileBanner)
+	}
+	if category.WebsiteBanner != nil {
+		bannerWebsite = view_models.NewFileVm().Build(*category.WebsiteBanner)
+	}
+	if category.MobileHeroBanner != nil {
+		heroMobile = view_models.NewFileVm().Build(*category.MobileHeroBanner)
+	}
+	if category.WebsiteHeroBanner != nil {
+		heroWebsite = view_models.NewFileVm().Build(*category.WebsiteHeroBanner)
+	}
+	if category.Parent != nil {
+		parent = vm.BuildParent(*category.Parent)
+	}
 	return CategoryDetailVm{
 		ID:                category.ID.String(),
 		Name:              category.Name,
-		Parent:            vm.BuildParent(category.Parent),
-		BannerMobile:      view_models.NewFileVm().Build(*category.MobileBanner),
-		BannerWebsite:     view_models.NewFileVm().Build(*category.WebsiteBanner),
-		HeroBannerMobile:  view_models.NewFileVm().Build(*category.MobileHeroBanner),
-		HeroBannerWebsite: view_models.NewFileVm().Build(*category.WebsiteHeroBanner),
+		Parent:            parent,
+		BannerMobile:      bannerMobile,
+		BannerWebsite:     bannerWebsite,
+		HeroBannerMobile:  heroMobile,
+		HeroBannerWebsite: heroWebsite,
 	}
 }
 
-func (vm CategoryVm) BuildParent(parent *models.Category) CategoryParentVm {
+func (vm CategoryVm) BuildParent(parent models.Category) CategoryParentVm {
 	return CategoryParentVm{
 		ID:   parent.ID.String(),
 		Name: parent.Name,
@@ -79,11 +105,27 @@ func (vm CategoryVm) BuildParent(parent *models.Category) CategoryParentVm {
 }
 
 func (vm CategoryVm) BuildMedia(category *models.Category) CategoryMediaVm {
+	var bannerMobile view_models.FileVm
+	var bannerWebsite view_models.FileVm
+	var heroMobile view_models.FileVm
+	var heroWebsite view_models.FileVm
+	if category.MobileBanner != nil {
+		bannerMobile = view_models.NewFileVm().Build(*category.MobileBanner)
+	}
+	if category.WebsiteBanner != nil {
+		bannerWebsite = view_models.NewFileVm().Build(*category.WebsiteBanner)
+	}
+	if category.MobileHeroBanner != nil {
+		heroMobile = view_models.NewFileVm().Build(*category.MobileHeroBanner)
+	}
+	if category.WebsiteHeroBanner != nil {
+		heroWebsite = view_models.NewFileVm().Build(*category.WebsiteHeroBanner)
+	}
 	return CategoryMediaVm{
 		ID:                category.ID.String(),
-		BannerMobile:      view_models.NewFileVm().Build(*category.MobileBanner),
-		BannerWebsite:     view_models.NewFileVm().Build(*category.WebsiteBanner),
-		HeroBannerMobile:  view_models.NewFileVm().Build(*category.MobileHeroBanner),
-		HeroBannerWebsite: view_models.NewFileVm().Build(*category.WebsiteHeroBanner),
+		BannerMobile:      bannerMobile,
+		BannerWebsite:     bannerWebsite,
+		HeroBannerMobile:  heroMobile,
+		HeroBannerWebsite: heroWebsite,
 	}
 }

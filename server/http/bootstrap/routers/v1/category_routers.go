@@ -13,7 +13,7 @@ type CategoryRouters struct {
 }
 
 func (route CategoryRouters) CategoryRoute() {
-	handler := v1.NewBrandHandler(route.Handler)
+	handler := v1.NewCategoryHandler(route.Handler)
 	jwtMiddleware := middlewares.JwtMiddleware{Contract: route.Handler.UcContract}
 
 	categoryRoutes := route.RouteGroup.Group("/category")
