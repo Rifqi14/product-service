@@ -18,7 +18,7 @@ func (boot Bootstrap) ProductRoute() {
 	}
 
 	// Route for check health
-	rootParentGroup := boot.App.Group("/product-service")
+	rootParentGroup := boot.App.Group("/product")
 	rootParentGroup.Get("", func(c *fiber.Ctx) error {
 		return c.Status(http.StatusOK).JSON("Product service is working")
 	})

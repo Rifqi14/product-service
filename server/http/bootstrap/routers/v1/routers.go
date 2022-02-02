@@ -18,4 +18,10 @@ func (routers Routers) ProductRoute() {
 		Handler:    routers.Handler,
 	}
 	brandRoutes.BrandRoute()
+
+	categoryRoutes := CategoryRouters{
+		RouteGroup: apiV1,
+		Handler:    routers.Handler,
+	}
+	categoryRoutes.CategoryRoute()
 }

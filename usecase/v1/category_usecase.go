@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
@@ -51,9 +53,24 @@ func (uc CategoryUsecase) Create(req *request.CategoryRequest) (res view_models.
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-create-category")
 		return res, err
 	}
+	var modulePath []string
+	path, err := uc.createPath(&category.ID, modulePath)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-category")
+		return res, err
+	}
+	category.Path = strings.Join(path[:], " / ")
+	category.Level = int64(len(path))
+	err = db.Save(&category).Error
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-category")
+		return res, err
+	}
 
-	res = view_models.NewCategoryVm().BuildDetail(&category)
 	tx.Commit()
+	res, _ = uc.Detail(category.ID)
 	return res, nil
 }
 
@@ -80,7 +97,7 @@ func (uc CategoryUsecase) Detail(categoryID uuid.UUID) (res view_models.Category
 	db := uc.DB
 	repository := query.NewQueryCategoryRepository(db)
 
-	category, err := repository.Detail(categoryID)
+	category, err := repository.Detail(&categoryID)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-detail-brand")
 		return res, err
@@ -122,8 +139,29 @@ func (uc CategoryUsecase) Update(req *request.CategoryRequest, categoryID uuid.U
 		return res, err
 	}
 
-	res = view_models.NewCategoryVm().BuildDetail(&category)
+	// var modulePath []string
+	// path, err := uc.createPath(&categoryID, modulePath)
+	// if err != nil {
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-transaction")
+	// 	return res, err
+	// }
+	// category.Path = strings.Join(path[:], " / ")
+	// category.Level = int64(len(path))
+	// err = db.Save(&category).Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-transaction")
+	// 	return res, err
+	// }
+	// err = uc.updatePath(categoryID)
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-transaction")
+	// 	return res, err
+	// }
+
 	tx.Commit()
+	res, _ = uc.Detail(category.ID)
 	return res, nil
 }
 
@@ -158,4 +196,64 @@ func (uc CategoryUsecase) Delete(categoryID uuid.UUID) (err error) {
 
 func (uc CategoryUsecase) Export(fileType string) (err error) {
 	panic("Under development")
+}
+
+func (uc CategoryUsecase) createPath(categoryId *uuid.UUID, path []string) (paths []string, err error) {
+	repository := query.NewQueryCategoryRepository(uc.DB)
+
+	category, err := repository.Detail(categoryId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-findById-category")
+		return nil, err
+	}
+	path = append([]string{category.Name}, path...)
+	if category.ParentID != nil {
+		path, err = uc.createPath(category.ParentID, path)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-category")
+			return nil, err
+		}
+		return path, nil
+	}
+	return path, nil
+}
+
+func (uc CategoryUsecase) updatePath(categoryId uuid.UUID) error {
+	db := uc.DB
+	repository := query.NewQueryCategoryRepository(db)
+	commandRepo := command.NewCommandCategoryRepository(db)
+
+	categories, err := repository.Parent(categoryId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-category")
+		return err
+	}
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
+		return err
+	}
+	for _, category := range categories {
+		var categoryPath []string
+		path, _ := uc.createPath(&category.ID, categoryPath)
+		model := models.Category{
+			ID:    category.ID,
+			Path:  strings.Join(path, " / "),
+			Level: int64(len(path)),
+		}
+		_, err := commandRepo.Update(model)
+		if err != nil {
+			tx.Rollback()
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-category")
+			return err
+		}
+		err = uc.updatePath(category.ID)
+		if err != nil {
+			tx.Rollback()
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-category")
+			return err
+		}
+	}
+	tx.Commit()
+	return nil
 }

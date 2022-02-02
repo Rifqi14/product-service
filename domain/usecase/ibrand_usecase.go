@@ -9,7 +9,7 @@ import (
 type IBrandUsecase interface {
 	Create(req *request.BrandRequest) (res view_models.BrandDetailVm, err error)
 
-	List(req *request.Pagination) (res []view_models.BrandListVm, pagination view_models.PaginationVm, err error)
+	List(req *request.Pagination) (res []view_models.BrandFullVm, pagination view_models.PaginationVm, err error)
 
 	Detail(brandId uuid.UUID) (res view_models.BrandDetailVm, err error)
 
