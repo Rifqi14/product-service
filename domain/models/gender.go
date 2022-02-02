@@ -8,7 +8,7 @@ import (
 )
 
 type Gender struct {
-	ID        uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
+	ID        *uuid.UUID `gorm:"primaryKey;type:uuid;default:uuid_generate_v4()"`
 	Name      string
 	ParentID  *uuid.UUID `gorm:"type:uuid"`
 	Level     int64
@@ -19,6 +19,6 @@ type Gender struct {
 	CreatedAt time.Time  `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
-	Parent    *Gender  `gorm:"foreignkey:ParentID"`
-	Childs    []Gender `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Parent    *Gender  `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Childs    []Gender `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

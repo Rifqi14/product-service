@@ -20,5 +20,5 @@ type Label struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
 	Parent    *Label  `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Childs    []Label `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Childs    []Label `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

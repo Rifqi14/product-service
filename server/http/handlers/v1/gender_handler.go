@@ -70,7 +70,12 @@ func (handler GenderHandler) Detail(ctx *fiber.Ctx) (err error) {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
 	}
 
-	return responses.NewResponse(responses.ResponseSuccess(data, nil, "gender success fetched")).Send(ctx)
+	var res interface{}
+	if data.ID != "" {
+		res = data
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "gender success fetched")).Send(ctx)
 }
 
 func (handler GenderHandler) Update(ctx *fiber.Ctx) (err error) {
