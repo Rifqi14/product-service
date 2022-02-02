@@ -37,3 +37,13 @@ func (repo CategoryRepository) Detail(categoryID uuid.UUID) (res models.Category
 	}
 	return res, nil
 }
+
+func (repo CategoryRepository) Parent(parentId uuid.UUID) (res []models.Category, err error) {
+	tx := repo.DB
+
+	err = tx.Preload("Parent").Find(&res, "parent_id = ?", parentId).Error
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}

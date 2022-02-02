@@ -45,6 +45,10 @@ github.com/golang/snappy v0.0.3/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEW
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/gosimple/slug v1.12.0 h1:xzuhj7G7cGtd34NXnW/yF0l+AGNfWqwgh/IXgFy7dnc=
+github.com/gosimple/slug v1.12.0/go.mod h1:UiRaFH+GEilHstLUmcBgWcI42viBN7mAb818JrYOeFQ=
+github.com/gosimple/unidecode v1.0.1 h1:hZzFTMMqSswvf0LBJZCZgThIZrpDHFXux9KeGmn6T/o=
+github.com/gosimple/unidecode v1.0.1/go.mod h1:CP0Cr1Y1kogOtx0bJblKzsVWrqYaqfNOnHzpgWw4Awc=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/jackc/chunkreader v1.0.0/go.mod h1:RT6O25fNZIuasFJRyZ4R/Y2BbhasbmZXF9QQ7T3kePo=
@@ -172,10 +176,14 @@ github.com/valyala/fasthttp v1.31.0/go.mod h1:2rsYD01CKFrjjsvFxx75KlEUNpWNBY9JWD
 github.com/valyala/tcplisten v1.0.0 h1:rBHj/Xf+E1tRGZyWIWwJDiRY0zc1Js+CV5DqwacVSA8=
 github.com/valyala/tcplisten v1.0.0/go.mod h1:T0xQ8SeCZGxckz9qRXTfG43PvQ/mcWh7FwZEA7Ioqkc=
 github.com/zenazn/goji v0.9.0/go.mod h1:7S9M489iMyHBNxwZnk9/EHS098H4/F6TATF2mIxtB1Q=
-gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220122050357-98f4fa5a11a2 h1:U750XhYydBcRr9YfnqtjKovD4/TN+WyBZR59Ig3A/aU=
-gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220122050357-98f4fa5a11a2/go.mod h1:Dsp7gGfrCtWh57O+utFOu09MkviqrwKafvfQtEj+1V0=
+gitlab.com/s2.1-backend/shm-auth-svc v0.0.0-20220128015832-7f84c601f7ff h1:MJXFPscVi82FVXsO7n4f7VZk7Aklau4rE8rAZyVl8nY=
+gitlab.com/s2.1-backend/shm-auth-svc v0.0.0-20220128015832-7f84c601f7ff/go.mod h1:My8YWmeG5xlE5fWNq+KpXQlfagP8RilW5aAYRc8Pnhw=
+gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220201222156-72eb609ce177 h1:1ax3a9q/BNvzoZPg8WKS/GSjavtesR0IBh5RUulHXg8=
+gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220201222156-72eb609ce177/go.mod h1:Dsp7gGfrCtWh57O+utFOu09MkviqrwKafvfQtEj+1V0=
 gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20220118071751-50c484663232 h1:s6tzeoPNgcIVKtpYOSOdQiApsEvmiUrM9VSz73vbWf8=
 gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20220118071751-50c484663232/go.mod h1:K2ZFLLLgQ2BQVFQ1iJGSZkz8KD+4OyQ9sfiWNXiema0=
+gitlab.com/s2.1-backend/shm-role-svc v0.0.0-20211213083926-b0fabc7bbc28 h1:ca1+/9pI1HL0Rc39nnDqyqsBnQvrAkPa/z9a7fthS8o=
+gitlab.com/s2.1-backend/shm-role-svc v0.0.0-20211213083926-b0fabc7bbc28/go.mod h1:PxwOyxdas/TTdqJnt7POtcAzZMIbZb0RoR9mbRjg/sM=
 go.uber.org/atomic v1.3.2/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 go.uber.org/atomic v1.4.0/go.mod h1:gD2HeocX3+yG+ygLZcrzQJaqmWj9AIm7n08wl/qW/PE=
 go.uber.org/atomic v1.5.0/go.mod h1:sABNBOSYdrvTF6hTgEIbc7YasKWGhgEQZyfxyTvoXHQ=
@@ -266,8 +274,8 @@ gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 h1:uRGJdciOHaEIrze2W8Q3AKkep
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWDmTeBkI65Dw0HsyUHuEVlX15mw=
 gopkg.in/yaml.v2 v2.2.1/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
-gopkg.in/yaml.v2 v2.2.4 h1:/eiJrUcujPVeJ3xlSWaiNi3uSVmDGBK1pDHUHAnao1I=
 gopkg.in/yaml.v2 v2.2.4/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
+gopkg.in/yaml.v2 v2.4.0 h1:D8xgwECY7CYvx+Y2n4sBz93Jn9JRvxdiyyo8CTfuKaY=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
 gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b h1:h8qDotaEPuJATrMmW04NCwg7v22aHH28wwpauUhK9Oo=
 gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

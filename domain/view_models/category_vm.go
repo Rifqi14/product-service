@@ -53,7 +53,7 @@ func (vm CategoryVm) BuildList(categories []models.Category) (res []CategoryList
 			ID:     category.ID.String(),
 			Parent: category.Parent.Name,
 			Child:  category.Name,
-			Banner: view_models.NewFileVm().Build(category.MobileBanner),
+			Banner: view_models.NewFileVm().Build(*category.MobileBanner),
 		})
 	}
 	return res
@@ -64,10 +64,10 @@ func (vm CategoryVm) BuildDetail(category *models.Category) CategoryDetailVm {
 		ID:                category.ID.String(),
 		Name:              category.Name,
 		Parent:            vm.BuildParent(category.Parent),
-		BannerMobile:      view_models.NewFileVm().Build(category.MobileBanner),
-		BannerWebsite:     view_models.NewFileVm().Build(category.WebsiteBanner),
-		HeroBannerMobile:  view_models.NewFileVm().Build(category.MobileHeroBanner),
-		HeroBannerWebsite: view_models.NewFileVm().Build(category.WebsiteHeroBanner),
+		BannerMobile:      view_models.NewFileVm().Build(*category.MobileBanner),
+		BannerWebsite:     view_models.NewFileVm().Build(*category.WebsiteBanner),
+		HeroBannerMobile:  view_models.NewFileVm().Build(*category.MobileHeroBanner),
+		HeroBannerWebsite: view_models.NewFileVm().Build(*category.WebsiteHeroBanner),
 	}
 }
 
@@ -81,9 +81,9 @@ func (vm CategoryVm) BuildParent(parent *models.Category) CategoryParentVm {
 func (vm CategoryVm) BuildMedia(category *models.Category) CategoryMediaVm {
 	return CategoryMediaVm{
 		ID:                category.ID.String(),
-		BannerMobile:      view_models.NewFileVm().Build(category.MobileBanner),
-		BannerWebsite:     view_models.NewFileVm().Build(category.WebsiteBanner),
-		HeroBannerMobile:  view_models.NewFileVm().Build(category.MobileHeroBanner),
-		HeroBannerWebsite: view_models.NewFileVm().Build(category.WebsiteHeroBanner),
+		BannerMobile:      view_models.NewFileVm().Build(*category.MobileBanner),
+		BannerWebsite:     view_models.NewFileVm().Build(*category.WebsiteBanner),
+		HeroBannerMobile:  view_models.NewFileVm().Build(*category.MobileHeroBanner),
+		HeroBannerWebsite: view_models.NewFileVm().Build(*category.WebsiteHeroBanner),
 	}
 }

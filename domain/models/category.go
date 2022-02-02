@@ -24,10 +24,10 @@ type Category struct {
 	CreatedAt           time.Time  `gorm:"<-:create"`
 	UpdatedAt           time.Time
 	DeletedAt           gorm.DeletedAt
-	Parent              *Category   `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Childs              []Category  `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	MobileBanner        models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	WebsiteBanner       models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	MobileHeroBanner    models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	WebsiteHeroBanner   models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Parent              *Category    `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Childs              []Category   `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	MobileBanner        *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	WebsiteBanner       *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	MobileHeroBanner    *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	WebsiteHeroBanner   *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
