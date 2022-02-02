@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
@@ -45,12 +47,27 @@ func (uc GenderUsecase) Create(req *request.GenderRequest) (res view_models.Gend
 	gender, err := repo.Create(model)
 	if err != nil {
 		tx.Rollback()
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-create-color")
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-create-gender")
+		return res, err
+	}
+	var dataPath []string
+	path, err := uc.createPath(gender.ID, dataPath)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-gender")
+		return res, err
+	}
+	gender.Path = strings.Join(path, " / ")
+	gender.Level = int64(len(path))
+	err = tx.Save(&gender).Error
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-gender")
 		return res, err
 	}
 
-	res = view_models.NewGenderVm().BuildDetail(&gender)
 	tx.Commit()
+	res, _ = uc.Detail(*gender.ID)
 	return res, nil
 }
 
@@ -82,7 +99,9 @@ func (uc GenderUsecase) Detail(genderId uuid.UUID) (res view_models.GenderDetail
 		return res, err
 	}
 
-	res = view_models.NewGenderVm().BuildDetail(&gender)
+	if gender.ID != nil {
+		res = view_models.NewGenderVm().BuildDetail(&gender)
+	}
 	return res, nil
 }
 
@@ -97,7 +116,7 @@ func (uc GenderUsecase) Update(req *request.GenderRequest, genderId uuid.UUID) (
 	}
 
 	model := models.Gender{
-		ID:        genderId,
+		ID:        &genderId,
 		Name:      req.Name,
 		ParentID:  req.ParentID,
 		UpdatedBy: &userId,
@@ -114,8 +133,29 @@ func (uc GenderUsecase) Update(req *request.GenderRequest, genderId uuid.UUID) (
 		return res, err
 	}
 
-	res = view_models.NewGenderVm().BuildDetail(&gender)
+	var dataPath []string
+	path, err := uc.createPath(gender.ID, dataPath)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-gender")
+		return res, err
+	}
+	gender.Path = strings.Join(path, " / ")
+	gender.Level = int64(len(path))
+	err = tx.Updates(&gender).Error
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-gender")
+		return res, err
+	}
+	err = uc.updatePath(*gender.ID)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-transaction")
+		return res, err
+	}
+
 	tx.Commit()
+	res, _ = uc.Detail(*gender.ID)
 	return res, nil
 }
 
@@ -130,7 +170,7 @@ func (uc GenderUsecase) Delete(genderId uuid.UUID) (err error) {
 	}
 
 	model := models.Gender{
-		ID:        genderId,
+		ID:        &genderId,
 		DeletedBy: &userId,
 	}
 	tx := db.Begin()
@@ -150,4 +190,66 @@ func (uc GenderUsecase) Delete(genderId uuid.UUID) (err error) {
 
 func (uc GenderUsecase) Export(fileType string) (err error) {
 	panic("Under development")
+}
+
+func (uc GenderUsecase) createPath(genderId *uuid.UUID, path []string) (paths []string, err error) {
+	repo := query.NewQueryGenderRepository(uc.DB)
+
+	gender, err := repo.Detail(*genderId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-detail-gender")
+		return nil, err
+	}
+	path = append([]string{gender.Name}, path...)
+	if gender.Parent != nil {
+		path, err := uc.createPath(gender.ParentID, path)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-gender")
+			return nil, err
+		}
+		return path, nil
+	}
+	return path, nil
+}
+
+func (uc GenderUsecase) updatePath(genderId uuid.UUID) error {
+	db := uc.DB
+	queryRepo := query.NewQueryGenderRepository(db)
+	commandRepo := command.NewCommandGenderRepository(db)
+
+	genders, err := queryRepo.Parent(genderId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-gender")
+		return err
+	}
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
+		return err
+	}
+	for _, gender := range genders {
+		var parentPath []string
+		path, _ := uc.createPath(gender.ID, parentPath)
+		userId := uuid.MustParse(uc.UserID)
+		model := models.Gender{
+			ID:        gender.ID,
+			Path:      strings.Join(path, " / "),
+			Level:     int64(len(path)),
+			UpdatedBy: &userId,
+		}
+		_, err := commandRepo.Update(model)
+		if err != nil {
+			tx.Rollback()
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-gender")
+			return err
+		}
+		err = uc.updatePath(*gender.ID)
+		if err != nil {
+			tx.Rollback()
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-gender")
+			return err
+		}
+	}
+	tx.Commit()
+	return nil
 }

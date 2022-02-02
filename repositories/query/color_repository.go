@@ -22,7 +22,7 @@ func (repo ColorRepository) List(search, orderBy, sort string, limit, offset int
 	tx := repo.DB
 	search = strings.ToLower(search)
 
-	err = tx.Joins("LEFT JOIN colors as parent ON parent.id = colors.parent_id").Where("LOWER(colors.name) like ? OR LOWER(colors.rgb_code) like ? OR LOWER(parent.name) like ? OR LOWER(parent.rgb_code) like ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Count(&count).Error
+	err = tx.Joins("LEFT JOIN colors as parent ON parent.id = colors.parent_id").Where("LOWER(colors.name) like ? OR LOWER(colors.rgb_code) like ? OR LOWER(parent.name) like ? OR LOWER(parent.rgb_code) like ?", "%"+search+"%", "%"+search+"%", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Error
 	if err != nil {
 		return res, count, err
 	}
