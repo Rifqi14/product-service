@@ -16,4 +16,5 @@ type MaterialCategory struct {
 	CreatedAt time.Time  `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
+	Material  []Material `gorm:"constraint:OnUpdate:Cascade,OnDelete:Cascade;"`
 }

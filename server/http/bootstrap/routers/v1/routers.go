@@ -42,4 +42,10 @@ func (routers Routers) ProductRoute() {
 		Handler:    routers.Handler,
 	}
 	labelRoutes.LabelRoute()
+
+	materialRoutes := MaterialRouters{
+		RouteGroup: apiV1,
+		Handler:    routers.Handler,
+	}
+	materialRoutes.MaterialRoute()
 }

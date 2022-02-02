@@ -15,9 +15,12 @@ func NewMaterialCategoryVm() MaterialCategoryVm {
 	return MaterialCategoryVm{}
 }
 
-func (vm MaterialCategoryVm) BuildDetail(materialCat *models.MaterialCategory) MaterialCategoryDetailVm {
-	return MaterialCategoryDetailVm{
-		ID:   materialCat.ID.String(),
-		Name: materialCat.Name,
+func (vm MaterialCategoryVm) BuildDetail(materialCat *models.MaterialCategory) (res *MaterialCategoryDetailVm) {
+	if materialCat != nil {
+		res = &MaterialCategoryDetailVm{
+			ID:   materialCat.ID.String(),
+			Name: materialCat.Name,
+		}
 	}
+	return res
 }
