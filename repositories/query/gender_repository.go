@@ -7,6 +7,7 @@ import (
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/repository/query"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type GenderRepository struct {
@@ -21,7 +22,12 @@ func (repo GenderRepository) List(search, orderBy, sort string, limit, offset in
 	tx := repo.DB
 	search = strings.ToLower(search)
 
-	err = tx.Preload("Parent", "LOWER(name) like ?", "%"+search+"%").Or("LOWER(genders.name) like ?", "%"+search+"%").Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Count(&count).Error
+	err = tx.Joins("LEFT JOIN genders as parent on parent.id = genders.parent_id").Where("lower(genders.name) like ? or lower(parent.name) like ?", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Error
+	if err != nil {
+		return res, count, err
+	}
+
+	err = tx.Joins("LEFT JOIN genders as parent on parent.id = genders.parent_id").Where("lower(genders.name) like ? or lower(parent.name) like ?", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Find(&models.Gender{}).Count(&count).Error
 	if err != nil {
 		return res, count, err
 	}
@@ -31,7 +37,17 @@ func (repo GenderRepository) List(search, orderBy, sort string, limit, offset in
 func (repo GenderRepository) Detail(genderId uuid.UUID) (res models.Gender, err error) {
 	tx := repo.DB
 
-	err = tx.Preload("Parent").Find(&res, "id = ?", genderId).Error
+	err = tx.Preload(clause.Associations).Find(&res, "id = ?", genderId).Error
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
+func (repo GenderRepository) Parent(parentId uuid.UUID) (res []models.Gender, err error) {
+	tx := repo.DB
+
+	err = tx.Preload("Parent").Find(&res, "parent_id = ?", parentId).Error
 	if err != nil {
 		return res, err
 	}
