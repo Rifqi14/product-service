@@ -9,7 +9,7 @@ import (
 type IBrandUsecase interface {
 	Create(req *request.BrandRequest) (res view_models.BrandDetailVm, err error)
 
-	List(req *request.Pagination) (res []view_models.BrandListVm, pagination view_models.PaginationVm, err error)
+	List(req *request.Pagination) (res []view_models.BrandFullVm, pagination view_models.PaginationVm, err error)
 
 	Detail(brandId uuid.UUID) (res view_models.BrandDetailVm, err error)
 
@@ -18,4 +18,6 @@ type IBrandUsecase interface {
 	Delete(ID uuid.UUID) (err error)
 
 	Export(fileType string) (err error)
+
+	Banned(req *request.BannedBrandRequest, brandID uuid.UUID) (res view_models.BrandDetailVm, err error)
 }
