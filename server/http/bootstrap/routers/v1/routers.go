@@ -24,4 +24,10 @@ func (routers Routers) ProductRoute() {
 		Handler:    routers.Handler,
 	}
 	categoryRoutes.CategoryRoute()
+
+	colorRoutes := ColorRouters{
+		RouteGroup: apiV1,
+		Handler:    routers.Handler,
+	}
+	colorRoutes.ColorRoute()
 }
