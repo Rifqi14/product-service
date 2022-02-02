@@ -3,7 +3,6 @@ package view_models
 import "gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 
 type LabelListVm struct {
-	No     int64  `json:"no"`
 	Parent string `json:"parent"`
 	Child  string `json:"child"`
 	ID     string `json:"label_id"`
@@ -30,10 +29,13 @@ func NewLabelVm() LabelVm {
 }
 
 func (vm LabelVm) BuildList(labels []models.Label) (res []LabelListVm) {
-	for i, label := range labels {
+	for _, label := range labels {
+		var parent string
+		if label.Parent != nil {
+			parent = label.Parent.Name
+		}
 		res = append(res, LabelListVm{
-			No:     int64(i + 1),
-			Parent: label.Parent.Name,
+			Parent: parent,
 			Child:  label.Name,
 			ID:     label.ID.String(),
 		})
@@ -49,9 +51,12 @@ func (vm LabelVm) BuildDetail(label *models.Label) LabelDetailVm {
 	}
 }
 
-func (vm LabelVm) BuildParent(parent *models.Label) *LabelParentVm {
-	return &LabelParentVm{
-		ID:   parent.ID.String(),
-		Name: parent.Name,
+func (vm LabelVm) BuildParent(parent *models.Label) (res *LabelParentVm) {
+	if parent != nil {
+		res = &LabelParentVm{
+			ID:   parent.ID.String(),
+			Name: parent.Name,
+		}
 	}
+	return res
 }

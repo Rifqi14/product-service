@@ -8,5 +8,7 @@ import (
 type ILabelRepository interface {
 	List(search, orderBy, sort string, limit, offset int64) (res []models.Label, count int64, err error)
 
-	Detail(labelId uuid.UUID) (res models.Label, err error)
+	Detail(labelId uuid.UUID) (res *models.Label, err error)
+
+	Parent(parentId uuid.UUID) (res []models.Label, err error)
 }

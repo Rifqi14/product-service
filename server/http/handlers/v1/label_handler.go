@@ -70,7 +70,12 @@ func (handler LabelHandler) Detail(ctx *fiber.Ctx) (err error) {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
 	}
 
-	return responses.NewResponse(responses.ResponseSuccess(data, nil, "label success fetched")).Send(ctx)
+	var res interface{}
+	if data.Name != "" {
+		res = data
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "label success fetched")).Send(ctx)
 }
 
 func (handler LabelHandler) Update(ctx *fiber.Ctx) (err error) {

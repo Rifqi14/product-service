@@ -21,7 +21,7 @@ func NewMaterialCategoryUsecase(contract *usecase.Contract) ucinterface.IMateria
 	return &MaterialCategoryUsecase{Contract: contract}
 }
 
-func (uc MaterialCategoryUsecase) Create(req *request.MaterialCategoryRequest) (res view_models.MaterialCategoryDetailVm, err error) {
+func (uc MaterialCategoryUsecase) Create(req *request.MaterialCategoryRequest) (res *view_models.MaterialCategoryDetailVm, err error) {
 	db := uc.DB
 	repo := command.NewCommandMaterialCategoryRepository(db)
 
@@ -48,8 +48,8 @@ func (uc MaterialCategoryUsecase) Create(req *request.MaterialCategoryRequest) (
 		return res, err
 	}
 
-	res = view_models.NewMaterialCategoryVm().BuildDetail(&material)
 	tx.Commit()
+	res, _ = uc.Detail(material.ID)
 	return res, nil
 }
 
@@ -66,14 +66,15 @@ func (uc MaterialCategoryUsecase) List(req *request.Pagination) (res []view_mode
 	}
 
 	for _, category := range categories {
-		res = append(res, view_models.NewMaterialCategoryVm().BuildDetail(&category))
+		catVm := view_models.NewMaterialCategoryVm().BuildDetail(&category)
+		res = append(res, *catVm)
 	}
 
 	pagination = uc.SetPaginationResponse(page, limit, count)
 	return res, pagination, nil
 }
 
-func (uc MaterialCategoryUsecase) Detail(materialCatId uuid.UUID) (res view_models.MaterialCategoryDetailVm, err error) {
+func (uc MaterialCategoryUsecase) Detail(materialCatId uuid.UUID) (res *view_models.MaterialCategoryDetailVm, err error) {
 	db := uc.DB
 	repo := query.NewQueryMaterialCategoryRepository(db)
 
@@ -83,11 +84,14 @@ func (uc MaterialCategoryUsecase) Detail(materialCatId uuid.UUID) (res view_mode
 		return res, err
 	}
 
-	res = view_models.NewMaterialCategoryVm().BuildDetail(&categories)
+	if categories != nil {
+		res = view_models.NewMaterialCategoryVm().BuildDetail(categories)
+	}
+
 	return res, nil
 }
 
-func (uc MaterialCategoryUsecase) Update(req *request.MaterialCategoryRequest, materialCatId uuid.UUID) (res view_models.MaterialCategoryDetailVm, err error) {
+func (uc MaterialCategoryUsecase) Update(req *request.MaterialCategoryRequest, materialCatId uuid.UUID) (res *view_models.MaterialCategoryDetailVm, err error) {
 	db := uc.DB
 	repo := command.NewCommandMaterialCategoryRepository(db)
 
@@ -114,8 +118,8 @@ func (uc MaterialCategoryUsecase) Update(req *request.MaterialCategoryRequest, m
 		return res, err
 	}
 
-	res = view_models.NewMaterialCategoryVm().BuildDetail(&materialCategory)
 	tx.Commit()
+	res, _ = uc.Detail(materialCategory.ID)
 	return res, nil
 }
 

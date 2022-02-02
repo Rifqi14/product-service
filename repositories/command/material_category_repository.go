@@ -34,6 +34,10 @@ func (repo MaterialCategoryRepository) Update(category models.MaterialCategory) 
 
 func (repo MaterialCategoryRepository) Delete(category models.MaterialCategory) (err error) {
 	tx := repo.DB
+	err = tx.Updates(&category).Error
+	if err != nil {
+		return err
+	}
 	err = tx.Delete(&category).Error
 	if err != nil {
 		return err

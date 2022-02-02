@@ -70,7 +70,12 @@ func (handler MaterialCategoryHandler) Detail(ctx *fiber.Ctx) (err error) {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
 	}
 
-	return responses.NewResponse(responses.ResponseSuccess(data, nil, "material category success fetched")).Send(ctx)
+	var res interface{}
+	if data != nil {
+		res = data
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "material category success fetched")).Send(ctx)
 }
 
 func (handler MaterialCategoryHandler) Update(ctx *fiber.Ctx) (err error) {

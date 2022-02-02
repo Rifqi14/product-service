@@ -8,5 +8,7 @@ import (
 type IMaterialRepository interface {
 	List(search, orderBy, sort string, limit, offset int64) (res []models.Material, count int64, err error)
 
-	Detail(materialId uuid.UUID) (res models.Material, err error)
+	Detail(materialId uuid.UUID) (res *models.Material, err error)
+
+	Parent(parentId uuid.UUID) (res []models.Material, err error)
 }

@@ -34,6 +34,10 @@ func (repo LabelRepository) Update(label models.Label) (res models.Label, err er
 
 func (repo LabelRepository) Delete(label models.Label) (err error) {
 	tx := repo.DB
+	err = tx.Updates(&label).Error
+	if err != nil {
+		return err
+	}
 	err = tx.Delete(&label).Error
 	if err != nil {
 		return err
