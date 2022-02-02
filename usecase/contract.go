@@ -38,6 +38,10 @@ const (
 
 	// Default last page for pagination
 	defaultLastPage = 0
+
+	// Status Enum Brand
+	StatusBrandActive = "Active"
+	StatusBrandBanned = "Banned"
 )
 
 func (uc Contract) SetPaginationParameter(page, limit int64, order, sort string) (int64, int64, int64, string, string) {

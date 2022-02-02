@@ -11,10 +11,10 @@ type ColorListVm struct {
 }
 
 type ColorDetailVm struct {
-	ID     string `json:"color_id"`
-	Name   string `json:"name"`
-	Hex    string `json:"hex"`
-	Parent *ColorParentVm
+	ID     string         `json:"color_id"`
+	Name   string         `json:"name"`
+	Hex    string         `json:"hex"`
+	Parent *ColorParentVm `json:"color_parent"`
 }
 
 type ColorParentVm struct {
@@ -33,9 +33,13 @@ func NewColorVm() ColorVm {
 
 func (vm ColorVm) BuildList(colors []models.Color) (res []ColorListVm) {
 	for i, color := range colors {
+		var parent string
+		if color.Parent != nil {
+			parent = color.Parent.Name
+		}
 		res = append(res, ColorListVm{
 			No:     int64(i + 1),
-			Parent: color.Parent.Name,
+			Parent: parent,
 			Child:  color.Name,
 			Hex:    color.RgbCode,
 			ID:     color.ID.String(),
@@ -54,8 +58,12 @@ func (vm ColorVm) BuildDetail(color *models.Color) ColorDetailVm {
 }
 
 func (vm ColorVm) BuildParent(parent *models.Color) *ColorParentVm {
-	return &ColorParentVm{
-		ID:   parent.ID.String(),
-		Name: parent.Name,
+	var res *ColorParentVm
+	if parent != nil {
+		res = &ColorParentVm{
+			ID:   parent.ID.String(),
+			Name: parent.Name,
+		}
 	}
+	return res
 }

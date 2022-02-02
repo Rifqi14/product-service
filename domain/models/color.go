@@ -17,9 +17,9 @@ type Color struct {
 	CreatedBy *uuid.UUID `gorm:"type:uuid"`
 	UpdatedBy *uuid.UUID `gorm:"type:uuid"`
 	DeletedBy *uuid.UUID `gorm:"type:uuid"`
-	CreatedAt time.Time
+	CreatedAt time.Time  `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
-	Parent    *Color  `gorm:"foreignkey:ParentID"`
-	Childs    []Color `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Parent    *Color  `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Childs    []Color `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

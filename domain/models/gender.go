@@ -16,9 +16,9 @@ type Gender struct {
 	CreatedBy *uuid.UUID `gorm:"type:uuid"`
 	UpdatedBy *uuid.UUID `gorm:"type:uuid"`
 	DeletedBy *uuid.UUID `gorm:"type:uuid"`
-	CreatedAt time.Time
+	CreatedAt time.Time  `gorm:"<-:create"`
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt
-	Parent    *Gender  `gorm:"foreignkey:ParentID"`
-	Childs    []Gender `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Parent    *Gender  `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Childs    []Gender `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }

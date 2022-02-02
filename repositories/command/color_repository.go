@@ -25,7 +25,7 @@ func (repo ColorRepository) Create(color models.Color) (res models.Color, err er
 
 func (repo ColorRepository) Update(color models.Color) (res models.Color, err error) {
 	tx := repo.DB
-	err = tx.Preload("Childs.Childs.Childs").Preload("Parent.Parent.Parent").Updates(&color).Error
+	err = tx.Preload("Parent.Parent.Parent").Updates(&color).Error
 	if err != nil {
 		return res, err
 	}
@@ -34,6 +34,10 @@ func (repo ColorRepository) Update(color models.Color) (res models.Color, err er
 
 func (repo ColorRepository) Delete(color models.Color) (err error) {
 	tx := repo.DB
+	err = tx.Updates(&color).Error
+	if err != nil {
+		return err
+	}
 	err = tx.Delete(&color).Error
 	if err != nil {
 		return err

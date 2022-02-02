@@ -19,5 +19,5 @@ type BrandRequest struct {
 type BannedBrandRequest struct {
 	Status string     `form:"status" json:"status" validate:"required"`
 	Reason string     `form:"reason" json:"reason" validate:"required"`
-	DocID  *uuid.UUID `form:"documment_id" json:"document_id"`
+	DocID  *uuid.UUID `form:"document_id" json:"document_id"`
 }

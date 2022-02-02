@@ -21,6 +21,7 @@ func (route BrandRouters) BrandRoute() {
 	brandRoutes.Get("/:id", handler.Detail)
 	brandRoutes.Use(jwtMiddleware.New)
 	brandRoutes.Post("", handler.Create)
+	brandRoutes.Post("/ban/:id", handler.Banned)
 	brandRoutes.Patch("/:id", handler.Update)
 	brandRoutes.Delete("/:id", handler.Delete)
 }

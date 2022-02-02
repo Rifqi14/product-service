@@ -14,5 +14,5 @@ RUN go mod vendor
 WORKDIR $PKG_PATH/server/http
 RUN echo $PWD
 RUN go build main.go
-EXPOSE 9005
+EXPOSE 9004
 CMD ["sh", "-c", "./main"]

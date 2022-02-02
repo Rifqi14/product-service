@@ -8,6 +8,8 @@ import (
 type IBrandRepository interface {
 	Create(model models.Brand, tx *gorm.DB) (res models.Brand, err error)
 
+	Banned(model models.BrandLog, tx *gorm.DB) (res models.BrandLog, err error)
+
 	Update(model models.Brand, tx *gorm.DB) (res models.Brand, err error)
 
 	Delete(model models.Brand, tx *gorm.DB) (err error)

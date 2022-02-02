@@ -4,6 +4,7 @@ import (
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/repository/command"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type BrandRepository struct {
@@ -22,8 +23,16 @@ func (BrandRepository) Create(brand models.Brand, tx *gorm.DB) (res models.Brand
 	return brand, nil
 }
 
+func (BrandRepository) Banned(banned models.BrandLog, tx *gorm.DB) (res models.BrandLog, err error) {
+	err = tx.Create(&banned).Error
+	if err != nil {
+		return res, err
+	}
+	return banned, nil
+}
+
 func (BrandRepository) Update(brand models.Brand, tx *gorm.DB) (res models.Brand, err error) {
-	err = tx.Preload("MediaSocials").Preload("BannedDocument").Preload("UnbannedDocument").Updates(&brand).Error
+	err = tx.Preload(clause.Associations).Updates(&brand).Error
 	if err != nil {
 		return res, err
 	}
