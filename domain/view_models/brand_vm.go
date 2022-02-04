@@ -119,7 +119,7 @@ func (vm BrandVm) BuildList(model []models.Brand) (res []BrandListVm) {
 	return res
 }
 
-func (vm BrandVm) BuildDetail(brand *models.Brand) BrandDetailVm {
+func (vm BrandVm) BuildDetail(brand *models.Brand) (res BrandDetailVm) {
 	var logo view_models.FileVm
 	var web view_models.FileVm
 	var mobile view_models.FileVm
@@ -132,23 +132,26 @@ func (vm BrandVm) BuildDetail(brand *models.Brand) BrandDetailVm {
 	if brand.BannerMobile != nil {
 		mobile = view_models.NewFileVm().Build(*brand.BannerMobile)
 	}
-	return BrandDetailVm{
-		ID:              brand.ID.String(),
-		Name:            brand.Name,
-		Slug:            brand.Slug,
-		Title:           brand.Title,
-		Catchphrase:     brand.Catchphrase,
-		Status:          brand.Status,
-		Logo:            logo,
-		WebBanner:       web,
-		MobileBanner:    mobile,
-		CreatedAt:       brand.CreatedAt.Format("01-02-2006"),
-		Owner:           "",
-		EstablishedDate: brand.EstablishedDate.Format("01-02-2006"),
-		About:           brand.About,
-		Platform:        NewBrandMediaSocialVm().Build(brand.MediaSocials),
-		Banned:          vm.BuildLog(brand.Logs),
+	if brand != nil {
+		res = BrandDetailVm{
+			ID:              brand.ID.String(),
+			Name:            brand.Name,
+			Slug:            brand.Slug,
+			Title:           brand.Title,
+			Catchphrase:     brand.Catchphrase,
+			Status:          brand.Status,
+			Logo:            logo,
+			WebBanner:       web,
+			MobileBanner:    mobile,
+			CreatedAt:       brand.CreatedAt.Format("01-02-2006"),
+			Owner:           "",
+			EstablishedDate: brand.EstablishedDate.Format("01-02-2006"),
+			About:           brand.About,
+			Platform:        NewBrandMediaSocialVm().Build(brand.MediaSocials),
+			Banned:          vm.BuildLog(brand.Logs),
+		}
 	}
+	return res
 }
 
 func (vm BrandVm) BuildLog(logs []models.BrandLog) (res []BrandLogVm) {

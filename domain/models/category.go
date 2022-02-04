@@ -30,4 +30,5 @@ type Category struct {
 	WebsiteBanner       *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	MobileHeroBanner    *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	WebsiteHeroBanner   *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Products            []*Product   `gorm:"many2many:product_categories"`
 }
