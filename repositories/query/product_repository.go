@@ -23,6 +23,19 @@ func (repo ProductRepository) List(search, orderBy, sort, productName string, li
 	// search = strings.ToLower(search)
 	productName = strings.ToLower(productName)
 
+	if len(color) > 0 {
+		tx = tx.Joins("left join product_colors as ps on ps.product_id = products.id").Where("ps.color_id in ?", color)
+	}
+	if len(product) > 0 {
+		tx = tx.Where("id in ?", product)
+	}
+	if len(brand) > 0 {
+		tx = tx.Where("brand_id in ?", color)
+	}
+	if minPrice > 0 && maxPrice > 0 {
+		tx = tx.Where("final_price between ? and ?", minPrice, maxPrice)
+	}
+
 	err = tx.Where("lower(name) like ?", "%"+productName+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Error
 	if err != nil {
 		return nil, 0, err
