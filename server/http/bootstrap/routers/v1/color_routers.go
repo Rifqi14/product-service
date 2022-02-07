@@ -17,7 +17,7 @@ func (route ColorRouters) ColorRoute() {
 	jwtMiddleware := middlewares.JwtMiddleware{Contract: route.Handler.UcContract}
 
 	colorRoutes := route.RouteGroup.Group("/color")
-	colorRoutes.Get("", handler.List)
+	colorRoutes.Post("", handler.List)
 	colorRoutes.Get("/:id", handler.Detail)
 	colorRoutes.Use(jwtMiddleware.New)
 	colorRoutes.Post("", handler.Create)

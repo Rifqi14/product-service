@@ -17,7 +17,7 @@ func (route ProductRouters) ProductRoute() {
 	jwtMiddleware := middlewares.JwtMiddleware{Contract: route.Handler.UcContract}
 
 	productRoutes := route.RouteGroup.Group("/product")
-	productRoutes.Get("", handler.List)
+	productRoutes.Post("", handler.List)
 	productRoutes.Get("/:id", handler.Detail)
 
 	productRoutes.Use(jwtMiddleware.New)

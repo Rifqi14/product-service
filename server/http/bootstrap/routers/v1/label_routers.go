@@ -17,7 +17,7 @@ func (route LabelRouters) LabelRoute() {
 	jwtMiddleware := middlewares.JwtMiddleware{Contract: route.Handler.UcContract}
 
 	labelRoutes := route.RouteGroup.Group("/label")
-	labelRoutes.Get("", handler.List)
+	labelRoutes.Post("", handler.List)
 	labelRoutes.Get("/:id", handler.Detail)
 	labelRoutes.Use(jwtMiddleware.New)
 	labelRoutes.Post("", handler.Create)

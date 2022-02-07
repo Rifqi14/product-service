@@ -17,7 +17,7 @@ func (route CategoryRouters) CategoryRoute() {
 	jwtMiddleware := middlewares.JwtMiddleware{Contract: route.Handler.UcContract}
 
 	categoryRoutes := route.RouteGroup.Group("/category")
-	categoryRoutes.Get("", handler.List)
+	categoryRoutes.Post("", handler.List)
 	categoryRoutes.Get("/:id", handler.Detail)
 	categoryRoutes.Use(jwtMiddleware.New)
 	categoryRoutes.Post("", handler.Create)
