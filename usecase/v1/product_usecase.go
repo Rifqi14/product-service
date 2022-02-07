@@ -69,7 +69,7 @@ func (uc ProductUsecase) Create(req *request.ProductRequest) (res *view_models.P
 		Colors:        uc.appendColors(req.Variants),
 		Variants:      uc.appendVariantDetails(req.Variants),
 		Images:        uc.appendVariantImages(req.Variants),
-		IsDisplayed:   isDisplayed,
+		IsDisplayed:   &isDisplayed,
 		CreatedBy:     &userId,
 		UpdatedBy:     &userId,
 	}
@@ -164,7 +164,7 @@ func (uc ProductUsecase) Update(req *request.ProductRequest, productId uuid.UUID
 		Height:        int(req.PackageDimension.Height),
 		PoStatus:      req.PreOrder.Status,
 		PoDay:         int(req.PreOrder.PreOrderDay),
-		IsDisplayed:   isDisplayed,
+		IsDisplayed:   &isDisplayed,
 		CreatedBy:     &userId,
 		UpdatedBy:     &userId,
 	}
@@ -232,6 +232,60 @@ func (uc ProductUsecase) Delete(productId uuid.UUID) (err error) {
 		return err
 	}
 
+	tx.Commit()
+	return nil
+}
+
+func (uc ProductUsecase) ChangeStatus(req *request.BannedProductRequest, productId *uuid.UUID) (err error) {
+	db := uc.DB
+	repo := command.NewCommandProductRepository(db)
+	userId, err := uuid.Parse(uc.UserID)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "error-parse-toUuid")
+		return err
+	}
+	product, err := uc.Detail(*productId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-check-product")
+		return err
+	}
+	if product == nil {
+		logruslogger.Log(logruslogger.WarnLevel, messages.DataNotFound, functioncaller.PrintFuncName(), "data-product-notFound")
+		return errors.New(messages.DataNotFound)
+	}
+	if !product.IsDisplayed {
+		logruslogger.Log(logruslogger.WarnLevel, messages.DataNotFound, functioncaller.PrintFuncName(), "data-already-inActive")
+		return errors.New("product already inactive")
+	}
+
+	status := "Active"
+	if !req.Status {
+		status = "Inactive"
+	}
+	attachmentId := uuid.MustParse(req.AttachmentID)
+
+	modelProduct := models.Product{
+		ID:          *productId,
+		IsDisplayed: &req.Status,
+		UpdatedBy:   &userId,
+		Logs: []models.ProductLog{
+			{
+				ProductID:    productId,
+				Reason:       req.Reason,
+				Status:       status,
+				AttachmentID: &attachmentId,
+				UpdatedBy:    &userId,
+			},
+		},
+	}
+	tx := db.Begin()
+	_, err = repo.Update(modelProduct)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "update-data-error")
+		return err
+	}
+	tx.Commit()
 	return nil
 }
 

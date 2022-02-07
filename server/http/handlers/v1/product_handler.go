@@ -139,3 +139,25 @@ func (handler ProductHandler) Delete(ctx *fiber.Ctx) (err error) {
 func (handler ProductHandler) Export(ctx *fiber.Ctx) (err error) {
 	panic("Under development")
 }
+
+func (handler ProductHandler) ChangeStatus(ctx *fiber.Ctx) (err error) {
+	productId, err := uuid.Parse(ctx.Params("id"))
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
+	}
+	req := new(request.BannedProductRequest)
+	if err := ctx.BodyParser(req); err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, "error parsing body request", err)).Send(ctx)
+	}
+	if err := handler.Validate.Struct(req); err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, "validation data error", err.(validator.ValidationErrors))).Send(ctx)
+	}
+
+	uc := v1.NewProductUsecase(handler.UcContract)
+	err = uc.ChangeStatus(req, &productId)
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.EditFailed, err)).Send(ctx)
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(nil, nil, "product berhasil dinonaktifkan")).Send(ctx)
+}

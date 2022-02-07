@@ -24,7 +24,7 @@ type Product struct {
 	Height          int
 	PoStatus        bool `gorm:"default:false"`
 	PoDay           int
-	IsDisplayed     bool       `gorm:"default:true"`
+	IsDisplayed     *bool      `gorm:"default:true"`
 	CreatedBy       *uuid.UUID `gorm:"type:uuid"`
 	UpdatedBy       *uuid.UUID `gorm:"type:uuid"`
 	DeletedBy       *uuid.UUID `gorm:"type:uuid"`

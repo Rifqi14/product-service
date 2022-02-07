@@ -67,3 +67,9 @@ type FilterQueryProductRequest struct {
 	MinPrice    int64    `json:"minimum_price" form:"minimum_price" query:"minimum_price"`
 	MaxPrice    int64    `json:"maximum_price" form:"maximum_price" query:"maximum_price"`
 }
+
+type BannedProductRequest struct {
+	Reason       string `json:"reason" form:"reason"`
+	AttachmentID string `json:"attachment_id" form:"attachment_id"`
+	Status       bool   `json:"status" form:"status"`
+}

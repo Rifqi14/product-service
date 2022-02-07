@@ -14,4 +14,6 @@ type IProductHandler interface {
 	Delete(ctx *fiber.Ctx) (err error)
 
 	Export(ctx *fiber.Ctx) (err error)
+
+	ChangeStatus(ctx *fiber.Ctx) (err error)
 }

@@ -18,4 +18,6 @@ type IProductUsecase interface {
 	Delete(productId uuid.UUID) (err error)
 
 	Export(fileType string) (err error)
+
+	ChangeStatus(req *request.BannedProductRequest, productId *uuid.UUID) (err error)
 }
