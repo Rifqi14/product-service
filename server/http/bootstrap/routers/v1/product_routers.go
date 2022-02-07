@@ -22,6 +22,7 @@ func (route ProductRouters) ProductRoute() {
 
 	productRoutes.Use(jwtMiddleware.New)
 	productRoutes.Post("", handler.Create)
+	productRoutes.Post("/status/:id", handler.ChangeStatus)
 	productRoutes.Patch("/:id", handler.Update)
 	productRoutes.Delete("/:id", handler.Delete)
 }

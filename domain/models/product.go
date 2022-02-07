@@ -24,7 +24,7 @@ type Product struct {
 	Height          int
 	PoStatus        bool `gorm:"default:false"`
 	PoDay           int
-	IsDisplayed     bool       `gorm:"default:true"`
+	IsDisplayed     *bool      `gorm:"default:true"`
 	CreatedBy       *uuid.UUID `gorm:"type:uuid"`
 	UpdatedBy       *uuid.UUID `gorm:"type:uuid"`
 	DeletedBy       *uuid.UUID `gorm:"type:uuid"`
@@ -32,7 +32,7 @@ type Product struct {
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt
 	Brand           *Brand                 `gorm:"foreignKey:BrandID;constraint:OnUpdate:Cascade,OnDelete:Cascade;"`
-	Logs            []ProductLog           `gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Logs            []*ProductLog          `gorm:"foreignKey:ProductID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Categories      []*Category            `gorm:"many2many:product_categories;constraint:OnDelete:CASCADE;"`
 	Labels          []*Label               `gorm:"many2many:product_labels;constraint:OnDelete:CASCADE;"`
 	Materials       []*Material            `gorm:"many2many:product_materials;constraint:OnDelete:CASCADE;"`

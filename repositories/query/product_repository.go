@@ -36,12 +36,12 @@ func (repo ProductRepository) List(search, orderBy, sort, productName string, li
 		tx = tx.Where("final_price between ? and ?", minPrice, maxPrice)
 	}
 
-	err = tx.Where("lower(name) like ?", "%"+productName+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Error
+	err = tx.Where("lower(name) like ?", "%"+productName+"%").Preload(clause.Associations).Preload("Logs.Attachment").Preload("Logs.Verifier").Preload("Variants.Color").Preload("Images.Color").Preload("Images.Image").Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Error
 	if err != nil {
 		return nil, 0, err
 	}
 
-	err = tx.Where("lower(name) like ?", "%"+productName+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Find(&res).Count(&count).Error
+	err = tx.Where("lower(name) like ?", "%"+productName+"%").Preload(clause.Associations).Preload("Logs.Attachment").Preload("Variants.Color").Preload("Images.Color").Preload("Images.Image").Preload("Logs.Verifier").Order(orderBy + " " + sort).Find(&res).Count(&count).Error
 	if err != nil {
 		return nil, 0, err
 	}
@@ -52,7 +52,7 @@ func (repo ProductRepository) List(search, orderBy, sort, productName string, li
 func (repo ProductRepository) Detail(productId uuid.UUID) (res *models.Product, err error) {
 	tx := repo.DB
 
-	err = tx.Preload(clause.Associations).Preload("Variants.Color").Preload("Images.Color").Preload("Images.Image").Find(&res, "id = ?", productId).Error
+	err = tx.Preload(clause.Associations).Preload("Variants.Color").Preload("Images.Color").Preload("Images.Image").Preload("Logs.Attachment").Preload("Logs.Verifier").Find(&res, "id = ?", productId).Error
 	if err != nil {
 		return res, err
 	}

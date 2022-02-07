@@ -22,6 +22,7 @@ type ProductVm struct {
 	Dimension     *PackageDimensionVm      `json:"package_dimension"`
 	PreOrder      *PreOrderVm              `json:"pre_order"`
 	IsDisplayed   bool                     `json:"is_displayed"`
+	Logs          []*ProductLogVm          `json:"logs"`
 	Categories    []*CategoryDetailVm      `json:"categories"`
 	Labels        []*LabelDetailVm         `json:"labels"`
 	Materials     []*MaterialDetailVm      `json:"materials"`
@@ -102,7 +103,8 @@ func (vm BuildProductVm) BuildList(products []*models.Product) (res []*ProductVm
 					PoStatus: product.PoStatus,
 					PoDay:    product.PoDay,
 				},
-				IsDisplayed: product.IsDisplayed,
+				IsDisplayed: *product.IsDisplayed,
+				Logs:        NewProductLogVm().BuildList(product.Logs),
 				Categories:  vm.buildProductCategories(product),
 				Labels:      vm.buildProductLabels(product),
 				Materials:   vm.buildProductMaterials(product),
@@ -151,7 +153,8 @@ func (vm BuildProductVm) BuildDetail(product *models.Product) (res *ProductVm) {
 				PoStatus: product.PoStatus,
 				PoDay:    product.PoDay,
 			},
-			IsDisplayed: product.IsDisplayed,
+			IsDisplayed: *product.IsDisplayed,
+			Logs:        NewProductLogVm().BuildList(product.Logs),
 			Categories:  vm.buildProductCategories(product),
 			Labels:      vm.buildProductLabels(product),
 			Materials:   vm.buildProductMaterials(product),
