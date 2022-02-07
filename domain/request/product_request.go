@@ -50,10 +50,20 @@ type PreOrderRequest struct {
 
 type FilterProductRequest struct {
 	Pagination
-	ProductName string       `json:"product_name" form:"product_name"`
-	Product     []*uuid.UUID `json:"product_id" form:"product_id"`
-	Brand       []*uuid.UUID `json:"brand_id" form:"brand_id"`
-	Color       []*uuid.UUID `json:"color_id" form:"color_id"`
-	MinPrice    int64        `json:"minimum_price" form:"minimum_price"`
-	MaxPrice    int64        `json:"maximum_price" form:"maximum_price"`
+	ProductName string       `json:"product_name" form:"product_name" query:"product_name"`
+	Product     []*uuid.UUID `json:"product_id" form:"product_id" query:"product_id"`
+	Brand       []*uuid.UUID `json:"brand_id" form:"brand_id" query:"brand_id"`
+	Color       []*uuid.UUID `json:"color_id" form:"color_id" query:"color_id"`
+	MinPrice    int64        `json:"minimum_price" form:"minimum_price" query:"minimum_price"`
+	MaxPrice    int64        `json:"maximum_price" form:"maximum_price" query:"maximum_price"`
+}
+
+type FilterQueryProductRequest struct {
+	Pagination
+	ProductName string   `json:"product_name" form:"product_name" query:"product_name"`
+	Product     []string `json:"product_id" form:"product_id" query:"product_id"`
+	Brand       []string `json:"brand_id" form:"brand_id" query:"brand_id"`
+	Color       []string `json:"color_id" form:"color_id" query:"color_id"`
+	MinPrice    int64    `json:"minimum_price" form:"minimum_price" query:"minimum_price"`
+	MaxPrice    int64    `json:"maximum_price" form:"maximum_price" query:"maximum_price"`
 }

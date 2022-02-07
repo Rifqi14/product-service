@@ -42,7 +42,7 @@ func (handler GenderHandler) Create(ctx *fiber.Ctx) (err error) {
 
 func (handler GenderHandler) List(ctx *fiber.Ctx) (err error) {
 	req := new(request.Pagination)
-	if err := ctx.BodyParser(req); err != nil {
+	if err := ctx.QueryParser(req); err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
 	}
 	if err != nil {
