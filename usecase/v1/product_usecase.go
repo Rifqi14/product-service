@@ -268,7 +268,7 @@ func (uc ProductUsecase) ChangeStatus(req *request.BannedProductRequest, product
 		ID:          *productId,
 		IsDisplayed: &req.Status,
 		UpdatedBy:   &userId,
-		Logs: []models.ProductLog{
+		Logs: []*models.ProductLog{
 			{
 				ProductID:    productId,
 				Reason:       req.Reason,
