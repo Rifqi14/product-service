@@ -42,16 +42,41 @@ func (handler ProductHandler) Create(ctx *fiber.Ctx) (err error) {
 }
 
 func (handler ProductHandler) List(ctx *fiber.Ctx) (err error) {
-	req := new(request.FilterProductRequest)
-	if err := ctx.BodyParser(req); err != nil {
+	req := new(request.FilterQueryProductRequest)
+	if err := ctx.QueryParser(req); err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
 	}
 	if err != nil {
 		return responses.NewResponse(responses.ResponseErrorValidation(nil, nil, http.StatusBadRequest, "validasi data error", err.(validator.ValidationErrors))).Send(ctx)
 	}
 
+	reqFilter := new(request.FilterProductRequest)
+	reqFilter.Pagination = req.Pagination
+	reqFilter.ProductName = req.ProductName
+	reqFilter.MinPrice = req.MinPrice
+	reqFilter.MaxPrice = req.MaxPrice
+
+	if len(req.Product) > 0 && req.Product[0] != "" {
+		for _, productID := range req.Product {
+			ID := uuid.MustParse(productID)
+			reqFilter.Product = append(reqFilter.Product, &ID)
+		}
+	}
+	if len(req.Brand) > 0 && req.Brand[0] != "" {
+		for _, brandID := range req.Brand {
+			ID := uuid.MustParse(brandID)
+			reqFilter.Brand = append(reqFilter.Brand, &ID)
+		}
+	}
+	if len(req.Color) > 0 && req.Color[0] != "" {
+		for _, colorID := range req.Color {
+			ID := uuid.MustParse(colorID)
+			reqFilter.Color = append(reqFilter.Color, &ID)
+		}
+	}
+
 	uc := v1.NewProductUsecase(handler.UcContract)
-	data, meta, err := uc.List(req)
+	data, meta, err := uc.List(reqFilter)
 	if err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
 	}

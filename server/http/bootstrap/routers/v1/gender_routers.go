@@ -17,7 +17,7 @@ func (route GenderRouters) GenderRoute() {
 	jwtMiddleware := middlewares.JwtMiddleware{Contract: route.Handler.UcContract}
 
 	genderRoutes := route.RouteGroup.Group("/gender")
-	genderRoutes.Post("", handler.List)
+	genderRoutes.Get("", handler.List)
 	genderRoutes.Get("/:id", handler.Detail)
 	genderRoutes.Use(jwtMiddleware.New)
 	genderRoutes.Post("", handler.Create)
