@@ -21,5 +21,6 @@ type Material struct {
 	UpdatedAt          time.Time
 	DeletedAt          gorm.DeletedAt
 	Parent             *Material        `gorm:"foreignkey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Category           MaterialCategory `gorm:"foreignkey:MaterialCategoryID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Category           MaterialCategory `gorm:"foreignkey:MaterialCategoryID;constraint:OnUpdate:CASCADE,OnDelete:Restrict;"`
+	Products           []*Product       `gorm:"many2many:product_materials"`
 }

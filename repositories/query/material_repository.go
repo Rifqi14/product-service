@@ -53,3 +53,13 @@ func (repo MaterialRepository) Parent(parentId uuid.UUID) (res []models.Material
 	}
 	return res, nil
 }
+
+func (repo MaterialRepository) GetBy(column, operator string, value interface{}) (res []*models.Material, err error) {
+	tx := repo.DB
+
+	err = tx.Preload(clause.Associations).Find(&res, column+" "+operator+" ?", value).Error
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
