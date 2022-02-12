@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -154,6 +155,12 @@ func (uc BrandUsecase) Update(req *request.BrandRequest, brandID uuid.UUID) (res
 
 func (uc BrandUsecase) Delete(brandID uuid.UUID) (err error) {
 	repository := command.NewCommandBrandRepository(uc.DB)
+	productRepo := query.NewQueryProductRepository(uc.DB)
+	product, _ := productRepo.FindBy("brand_id", "=", brandID)
+	if len(product) > 0 {
+		logruslogger.Log(logruslogger.WarnLevel, "brand used in product", functioncaller.PrintFuncName(), "used-brand")
+		return errors.New("brand used in product")
+	}
 
 	userID, err := uuid.Parse(uc.UserID)
 	if err != nil {

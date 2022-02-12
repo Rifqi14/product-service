@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/google/uuid"
@@ -133,6 +134,7 @@ func (uc CategoryUsecase) Update(req *request.CategoryRequest, categoryID uuid.U
 		return res, err
 	}
 	category, err := repository.Update(model)
+	tx.Model(&category).Update("parent_id", req.ParentID)
 	if err != nil {
 		tx.Rollback()
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-create-category")
@@ -183,6 +185,11 @@ func (uc CategoryUsecase) Delete(categoryID uuid.UUID) (err error) {
 	if err := tx.Error; err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
 		return err
+	}
+	count := tx.Model(model).Association("Products").Count()
+	if count > 0 {
+		logruslogger.Log(logruslogger.WarnLevel, "data in used", functioncaller.PrintFuncName(), "data-in-used")
+		return errors.New("data in used")
 	}
 	err = repository.Delete(model)
 	if err != nil {

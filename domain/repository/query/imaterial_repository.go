@@ -11,4 +11,6 @@ type IMaterialRepository interface {
 	Detail(materialId uuid.UUID) (res *models.Material, err error)
 
 	Parent(parentId uuid.UUID) (res []models.Material, err error)
+
+	GetBy(column, operator string, value interface{}) (res []*models.Material, err error)
 }

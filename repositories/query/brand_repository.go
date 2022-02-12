@@ -22,11 +22,10 @@ func (repo BrandRepository) List(search, orderBy, sort string, limit, offset int
 	db := repo.DB
 	search = strings.ToLower(search)
 
-	err = db.Preload(clause.Associations).Where("LOWER(brands.name) like ?", "%"+search+"%").Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Count(&count).Error
+	err = db.Preload(clause.Associations).Preload("Logs."+clause.Associations).Where("LOWER(brands.name) like ?", "%"+search+"%").Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Limit(-1).Count(&count).Error
 	if err != nil {
 		return res, count, err
 	}
-	err = db.Where("LOWER(brands.name) like ?", "%"+search+"%").Find(&models.Brand{}).Count(&count).Error
 	if err != nil {
 		return res, count, err
 	}
@@ -36,7 +35,7 @@ func (repo BrandRepository) List(search, orderBy, sort string, limit, offset int
 func (repo BrandRepository) Detail(brandID uuid.UUID) (res models.Brand, err error) {
 	db := repo.DB
 
-	err = db.Preload(clause.Associations).Preload("Logs.Verifier").Preload("Logs.Attachment").Find(&res, "id = ?", brandID).Error
+	err = db.Preload(clause.Associations).Preload("Logs."+clause.Associations).Preload("Logs.Verifier").Preload("Logs.Attachment").Find(&res, "id = ?", brandID).Error
 	if err != nil {
 		return res, err
 	}
