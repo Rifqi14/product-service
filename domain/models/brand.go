@@ -27,7 +27,7 @@ type Brand struct {
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt
 	MediaSocials    []BrandMediaSocial `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Logs            []BrandLog         `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Logs            []*BrandLog        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Logo            *models.File       `gorm:"foreignKey:LogoID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BannerWeb       *models.File       `gorm:"foreignKey:BannerWebID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BannerMobile    *models.File       `gorm:"foreignKey:BannerMobileID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

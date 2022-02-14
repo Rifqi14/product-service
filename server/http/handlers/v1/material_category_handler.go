@@ -42,7 +42,7 @@ func (handler MaterialCategoryHandler) Create(ctx *fiber.Ctx) (err error) {
 
 func (handler MaterialCategoryHandler) List(ctx *fiber.Ctx) (err error) {
 	req := new(request.Pagination)
-	if err := ctx.BodyParser(req); err != nil {
+	if err := ctx.QueryParser(req); err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
 	}
 	if err != nil {
@@ -70,7 +70,12 @@ func (handler MaterialCategoryHandler) Detail(ctx *fiber.Ctx) (err error) {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
 	}
 
-	return responses.NewResponse(responses.ResponseSuccess(data, nil, "material category success fetched")).Send(ctx)
+	var res interface{}
+	if data != nil {
+		res = data
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "material category success fetched")).Send(ctx)
 }
 
 func (handler MaterialCategoryHandler) Update(ctx *fiber.Ctx) (err error) {

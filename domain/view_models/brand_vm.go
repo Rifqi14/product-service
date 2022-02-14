@@ -6,19 +6,19 @@ import (
 )
 
 type BrandFullVm struct {
-	ID              string               `json:"brand_id"`
-	Name            string               `json:"name"`
-	Slug            string               `json:"slug"`
-	EstablishedDate string               `json:"established_date"`
-	Title           string               `json:"title_brand"`
-	Catchphrase     string               `json:"jargon_brand"`
-	About           string               `json:"tentang_brand"`
-	Status          string               `json:"status_brand"`
-	BannerWeb       *view_models.FileVm  `json:"banner_web"`
-	Logo            *view_models.FileVm  `json:"logo"`
-	BannerMobile    *view_models.FileVm  `json:"banner_mobile"`
-	Platform        []BrandMediaSocialVm `json:"platform"`
-	Logs            []BrandLogVm         `json:"logs"`
+	ID              string                `json:"brand_id"`
+	Name            string                `json:"name"`
+	Slug            string                `json:"slug"`
+	EstablishedDate string                `json:"established_date"`
+	Title           string                `json:"title_brand"`
+	Catchphrase     string                `json:"jargon_brand"`
+	About           string                `json:"tentang_brand"`
+	Status          string                `json:"status_brand"`
+	BannerWeb       *view_models.FileVm   `json:"banner_web"`
+	Logo            *view_models.FileVm   `json:"logo"`
+	BannerMobile    *view_models.FileVm   `json:"banner_mobile"`
+	Platform        []*BrandMediaSocialVm `json:"platform"`
+	Logs            []*BrandLogVm         `json:"logs"`
 }
 
 type BrandListVm struct {
@@ -45,7 +45,7 @@ type BrandDetailVm struct {
 	EstablishedDate string               `json:"established_date"`
 	About           string               `json:"about"`
 	Platform        []BrandMediaSocialVm `json:"platform"`
-	Banned          []BrandLogVm         `json:"banned_logs"`
+	Banned          []*BrandLogVm        `json:"banned_logs"`
 }
 
 type BrandBannedVm struct {
@@ -55,10 +55,10 @@ type BrandBannedVm struct {
 }
 
 type BrandLogVm struct {
-	Status   string             `json:"status"`
-	Reason   string             `json:"reason"`
-	Verifier string             `json:"verifier"`
-	Document view_models.FileVm `json:"supporting_documment"`
+	Status   string              `json:"status"`
+	Reason   string              `json:"reason"`
+	Verifier string              `json:"verifier"`
+	Document *view_models.FileVm `json:"supporting_documment"`
 }
 
 type BrandVm struct {
@@ -73,34 +73,48 @@ func NewBrandVm() BrandVm {
 }
 
 func (vm BrandVm) BuildFull(brands []models.Brand) (res []BrandFullVm) {
-	for _, brand := range brands {
-		var logo view_models.FileVm
-		var web view_models.FileVm
-		var mobile view_models.FileVm
-		if brand.Logo != nil {
-			logo = view_models.NewFileVm().Build(*brand.Logo)
+	if len(brands) > 0 {
+		for _, brand := range brands {
+			if brand.Name != "" {
+				var logo *view_models.FileVm
+				var web *view_models.FileVm
+				var mobile *view_models.FileVm
+				var medsos []*BrandMediaSocialVm
+				if brand.Logo != nil {
+					logoVm := view_models.NewFileVm().Build(*brand.Logo)
+					logo = &logoVm
+				}
+				if brand.BannerWeb != nil {
+					webVm := view_models.NewFileVm().Build(*brand.BannerWeb)
+					web = &webVm
+				}
+				if brand.BannerMobile != nil {
+					mobileVm := view_models.NewFileVm().Build(*brand.BannerMobile)
+					mobile = &mobileVm
+				}
+				if len(brand.MediaSocials) > 0 {
+					medsosVm := NewBrandMediaSocialVm().Build(brand.MediaSocials)
+					for _, vm := range medsosVm {
+						medsos = append(medsos, &vm)
+					}
+				}
+				res = append(res, BrandFullVm{
+					ID:              brand.ID.String(),
+					Name:            brand.Name,
+					Slug:            brand.Slug,
+					EstablishedDate: brand.EstablishedDate.Format("01-02-2006"),
+					Title:           brand.Title,
+					Catchphrase:     brand.Catchphrase,
+					About:           brand.About,
+					Status:          brand.Status,
+					Logo:            logo,
+					BannerWeb:       web,
+					BannerMobile:    mobile,
+					Platform:        medsos,
+					Logs:            vm.BuildLog(brand.Logs),
+				})
+			}
 		}
-		if brand.BannerWeb != nil {
-			web = view_models.NewFileVm().Build(*brand.BannerWeb)
-		}
-		if brand.BannerMobile != nil {
-			mobile = view_models.NewFileVm().Build(*brand.BannerMobile)
-		}
-		res = append(res, BrandFullVm{
-			ID:              brand.ID.String(),
-			Name:            brand.Name,
-			Slug:            brand.Slug,
-			EstablishedDate: brand.EstablishedDate.Format("01-02-2006"),
-			Title:           brand.Title,
-			Catchphrase:     brand.Catchphrase,
-			About:           brand.About,
-			Status:          brand.Status,
-			Logo:            &logo,
-			BannerWeb:       &web,
-			BannerMobile:    &mobile,
-			Platform:        NewBrandMediaSocialVm().Build(brand.MediaSocials),
-			Logs:            vm.BuildLog(brand.Logs),
-		})
 	}
 	return res
 }
@@ -119,7 +133,7 @@ func (vm BrandVm) BuildList(model []models.Brand) (res []BrandListVm) {
 	return res
 }
 
-func (vm BrandVm) BuildDetail(brand *models.Brand) BrandDetailVm {
+func (vm BrandVm) BuildDetail(brand *models.Brand) (res BrandDetailVm) {
 	var logo view_models.FileVm
 	var web view_models.FileVm
 	var mobile view_models.FileVm
@@ -132,37 +146,43 @@ func (vm BrandVm) BuildDetail(brand *models.Brand) BrandDetailVm {
 	if brand.BannerMobile != nil {
 		mobile = view_models.NewFileVm().Build(*brand.BannerMobile)
 	}
-	return BrandDetailVm{
-		ID:              brand.ID.String(),
-		Name:            brand.Name,
-		Slug:            brand.Slug,
-		Title:           brand.Title,
-		Catchphrase:     brand.Catchphrase,
-		Status:          brand.Status,
-		Logo:            logo,
-		WebBanner:       web,
-		MobileBanner:    mobile,
-		CreatedAt:       brand.CreatedAt.Format("01-02-2006"),
-		Owner:           "",
-		EstablishedDate: brand.EstablishedDate.Format("01-02-2006"),
-		About:           brand.About,
-		Platform:        NewBrandMediaSocialVm().Build(brand.MediaSocials),
-		Banned:          vm.BuildLog(brand.Logs),
+	if brand != nil {
+		res = BrandDetailVm{
+			ID:              brand.ID.String(),
+			Name:            brand.Name,
+			Slug:            brand.Slug,
+			Title:           brand.Title,
+			Catchphrase:     brand.Catchphrase,
+			Status:          brand.Status,
+			Logo:            logo,
+			WebBanner:       web,
+			MobileBanner:    mobile,
+			CreatedAt:       brand.CreatedAt.Format("01-02-2006"),
+			Owner:           "",
+			EstablishedDate: brand.EstablishedDate.Format("01-02-2006"),
+			About:           brand.About,
+			Platform:        NewBrandMediaSocialVm().Build(brand.MediaSocials),
+			Banned:          vm.BuildLog(brand.Logs),
+		}
 	}
+	return res
 }
 
-func (vm BrandVm) BuildLog(logs []models.BrandLog) (res []BrandLogVm) {
-	for _, log := range logs {
-		var attachment view_models.FileVm
-		if log.Attachment != nil {
-			attachment = view_models.NewFileVm().Build(*log.Attachment)
+func (vm BrandVm) BuildLog(logs []*models.BrandLog) (res []*BrandLogVm) {
+	if len(logs) > 0 {
+		for _, log := range logs {
+			var attachment *view_models.FileVm
+			if log.Attachment != nil {
+				attachmentVm := view_models.NewFileVm().Build(*log.Attachment)
+				attachment = &attachmentVm
+			}
+			res = append(res, &BrandLogVm{
+				Status:   log.Status,
+				Reason:   log.Reason,
+				Verifier: *log.Verifier.Username,
+				Document: attachment,
+			})
 		}
-		res = append(res, BrandLogVm{
-			Status:   log.Status,
-			Reason:   log.Reason,
-			Verifier: *log.Verifier.Username,
-			Document: attachment,
-		})
 	}
 	return res
 }

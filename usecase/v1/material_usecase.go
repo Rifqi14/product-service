@@ -1,6 +1,9 @@
 package v1
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/google/uuid"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
@@ -32,10 +35,11 @@ func (uc MaterialUsecase) Create(req *request.MaterialRequest) (res view_models.
 	}
 
 	model := models.Material{
-		Name:      req.Name,
-		ParentID:  req.ParentID,
-		CreatedBy: &userId,
-		UpdatedBy: &userId,
+		Name:               req.Name,
+		ParentID:           req.ParentID,
+		MaterialCategoryID: &req.MaterialCategoryID,
+		CreatedBy:          &userId,
+		UpdatedBy:          &userId,
 	}
 	tx := db.Begin()
 	if err := tx.Error; err != nil {
@@ -48,9 +52,24 @@ func (uc MaterialUsecase) Create(req *request.MaterialRequest) (res view_models.
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-create-material")
 		return res, err
 	}
+	var dataPath []string
+	path, err := uc.createPath(&material.ID, dataPath)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-material")
+		return res, err
+	}
+	material.Path = strings.Join(path, " / ")
+	material.Level = int64(len(path))
+	err = tx.Save(&material).Error
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-material")
+		return res, err
+	}
 
-	res = view_models.NewMaterialVm().BuildDetail(&material)
 	tx.Commit()
+	res, _ = uc.Detail(material.ID)
 	return res, nil
 }
 
@@ -76,13 +95,16 @@ func (uc MaterialUsecase) Detail(materialId uuid.UUID) (res view_models.Material
 	db := uc.DB
 	repo := query.NewQueryMaterialRepository(db)
 
-	gender, err := repo.Detail(materialId)
+	material, err := repo.Detail(materialId)
 	if err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-detail-material")
 		return res, err
 	}
 
-	res = view_models.NewMaterialVm().BuildDetail(&gender)
+	if material != nil {
+		res = view_models.NewMaterialVm().BuildDetail(material)
+	}
+
 	return res, nil
 }
 
@@ -97,25 +119,47 @@ func (uc MaterialUsecase) Update(req *request.MaterialRequest, materialId uuid.U
 	}
 
 	model := models.Material{
-		ID:        materialId,
-		Name:      req.Name,
-		ParentID:  req.ParentID,
-		UpdatedBy: &userId,
+		ID:                 materialId,
+		Name:               req.Name,
+		ParentID:           req.ParentID,
+		MaterialCategoryID: &req.MaterialCategoryID,
+		UpdatedBy:          &userId,
 	}
 	tx := db.Begin()
 	if err := tx.Error; err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
 		return res, err
 	}
-	label, err := repo.Update(model)
+	material, err := repo.Update(model)
 	if err != nil {
 		tx.Rollback()
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-update-material")
 		return res, err
 	}
 
-	res = view_models.NewMaterialVm().BuildDetail(&label)
+	var dataPath []string
+	path, err := uc.createPath(&material.ID, dataPath)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-material")
+		return res, err
+	}
+	material.Path = strings.Join(path, " / ")
+	material.Level = int64(len(path))
+	err = tx.Updates(&material).Error
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-material")
+		return res, err
+	}
+	err = uc.updatePath(material.ID)
+	if err != nil {
+		tx.Rollback()
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-transaction")
+		return res, err
+	}
+
 	tx.Commit()
+	res, _ = uc.Detail(material.ID)
 	return res, nil
 }
 
@@ -138,6 +182,11 @@ func (uc MaterialUsecase) Delete(materialId uuid.UUID) (err error) {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
 		return err
 	}
+	count := tx.Model(model).Association("Products").Count()
+	if count > 0 {
+		logruslogger.Log(logruslogger.WarnLevel, "data in used", functioncaller.PrintFuncName(), "data-in-used")
+		return errors.New("data in used")
+	}
 	err = repo.Delete(model)
 	if err != nil {
 		tx.Rollback()
@@ -150,4 +199,66 @@ func (uc MaterialUsecase) Delete(materialId uuid.UUID) (err error) {
 
 func (uc MaterialUsecase) Export(fileType string) (err error) {
 	panic("Under development")
+}
+
+func (uc MaterialUsecase) createPath(materialId *uuid.UUID, path []string) (paths []string, err error) {
+	repo := query.NewQueryMaterialRepository(uc.DB)
+
+	material, err := repo.Detail(*materialId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-detail-material")
+		return nil, err
+	}
+	path = append([]string{material.Name}, path...)
+	if material.Parent != nil {
+		path, err := uc.createPath(material.ParentID, path)
+		if err != nil {
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-material")
+			return nil, err
+		}
+		return path, nil
+	}
+	return path, nil
+}
+
+func (uc MaterialUsecase) updatePath(materialId uuid.UUID) error {
+	db := uc.DB
+	queryRepo := query.NewQueryMaterialRepository(db)
+	commandRepo := command.NewCommandMaterialRepository(db)
+
+	materials, err := queryRepo.Parent(materialId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-material")
+		return err
+	}
+	tx := db.Begin()
+	if err := tx.Error; err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
+		return err
+	}
+	for _, material := range materials {
+		var parentPath []string
+		path, _ := uc.createPath(&material.ID, parentPath)
+		userId := uuid.MustParse(uc.UserID)
+		model := models.Material{
+			ID:        material.ID,
+			Path:      strings.Join(path, " / "),
+			Level:     int64(len(path)),
+			UpdatedBy: &userId,
+		}
+		_, err := commandRepo.Update(model)
+		if err != nil {
+			tx.Rollback()
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-material")
+			return err
+		}
+		err = uc.updatePath(material.ID)
+		if err != nil {
+			tx.Rollback()
+			logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-material")
+			return err
+		}
+	}
+	tx.Commit()
+	return nil
 }

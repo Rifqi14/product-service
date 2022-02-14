@@ -42,7 +42,7 @@ func (handler LabelHandler) Create(ctx *fiber.Ctx) (err error) {
 
 func (handler LabelHandler) List(ctx *fiber.Ctx) (err error) {
 	req := new(request.Pagination)
-	if err := ctx.BodyParser(req); err != nil {
+	if err := ctx.QueryParser(req); err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
 	}
 	if err != nil {
@@ -70,7 +70,12 @@ func (handler LabelHandler) Detail(ctx *fiber.Ctx) (err error) {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
 	}
 
-	return responses.NewResponse(responses.ResponseSuccess(data, nil, "label success fetched")).Send(ctx)
+	var res interface{}
+	if data.Name != "" {
+		res = data
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "label success fetched")).Send(ctx)
 }
 
 func (handler LabelHandler) Update(ctx *fiber.Ctx) (err error) {

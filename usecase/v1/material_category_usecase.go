@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
@@ -21,7 +23,7 @@ func NewMaterialCategoryUsecase(contract *usecase.Contract) ucinterface.IMateria
 	return &MaterialCategoryUsecase{Contract: contract}
 }
 
-func (uc MaterialCategoryUsecase) Create(req *request.MaterialCategoryRequest) (res view_models.MaterialCategoryDetailVm, err error) {
+func (uc MaterialCategoryUsecase) Create(req *request.MaterialCategoryRequest) (res *view_models.MaterialCategoryDetailVm, err error) {
 	db := uc.DB
 	repo := command.NewCommandMaterialCategoryRepository(db)
 
@@ -48,8 +50,8 @@ func (uc MaterialCategoryUsecase) Create(req *request.MaterialCategoryRequest) (
 		return res, err
 	}
 
-	res = view_models.NewMaterialCategoryVm().BuildDetail(&material)
 	tx.Commit()
+	res, _ = uc.Detail(material.ID)
 	return res, nil
 }
 
@@ -66,14 +68,15 @@ func (uc MaterialCategoryUsecase) List(req *request.Pagination) (res []view_mode
 	}
 
 	for _, category := range categories {
-		res = append(res, view_models.NewMaterialCategoryVm().BuildDetail(&category))
+		catVm := view_models.NewMaterialCategoryVm().BuildDetail(&category)
+		res = append(res, *catVm)
 	}
 
 	pagination = uc.SetPaginationResponse(page, limit, count)
 	return res, pagination, nil
 }
 
-func (uc MaterialCategoryUsecase) Detail(materialCatId uuid.UUID) (res view_models.MaterialCategoryDetailVm, err error) {
+func (uc MaterialCategoryUsecase) Detail(materialCatId uuid.UUID) (res *view_models.MaterialCategoryDetailVm, err error) {
 	db := uc.DB
 	repo := query.NewQueryMaterialCategoryRepository(db)
 
@@ -83,11 +86,14 @@ func (uc MaterialCategoryUsecase) Detail(materialCatId uuid.UUID) (res view_mode
 		return res, err
 	}
 
-	res = view_models.NewMaterialCategoryVm().BuildDetail(&categories)
+	if categories != nil {
+		res = view_models.NewMaterialCategoryVm().BuildDetail(categories)
+	}
+
 	return res, nil
 }
 
-func (uc MaterialCategoryUsecase) Update(req *request.MaterialCategoryRequest, materialCatId uuid.UUID) (res view_models.MaterialCategoryDetailVm, err error) {
+func (uc MaterialCategoryUsecase) Update(req *request.MaterialCategoryRequest, materialCatId uuid.UUID) (res *view_models.MaterialCategoryDetailVm, err error) {
 	db := uc.DB
 	repo := command.NewCommandMaterialCategoryRepository(db)
 
@@ -114,14 +120,24 @@ func (uc MaterialCategoryUsecase) Update(req *request.MaterialCategoryRequest, m
 		return res, err
 	}
 
-	res = view_models.NewMaterialCategoryVm().BuildDetail(&materialCategory)
 	tx.Commit()
+	res, _ = uc.Detail(materialCategory.ID)
 	return res, nil
 }
 
 func (uc MaterialCategoryUsecase) Delete(materialCatId uuid.UUID) (err error) {
 	db := uc.DB
 	repo := command.NewCommandMaterialCategoryRepository(db)
+	materialRepo := query.NewQueryMaterialRepository(db)
+	material, err := materialRepo.GetBy("material_category_id", "=", materialCatId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get data material")
+		return err
+	}
+	if len(material) > 0 {
+		logruslogger.Log(logruslogger.WarnLevel, "cannot delete material category, in use in material", functioncaller.PrintFuncName(), "material-category-use")
+		return errors.New("cannot delete material category, in use in material")
+	}
 
 	userId, err := uuid.Parse(uc.UserID)
 	if err != nil {

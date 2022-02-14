@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/google/uuid"
@@ -179,6 +180,11 @@ func (uc ColorUsecase) Delete(colorID uuid.UUID) (err error) {
 	if err := tx.Error; err != nil {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
 		return err
+	}
+	count := tx.Model(model).Association("ProductColors").Count()
+	if count > 0 {
+		logruslogger.Log(logruslogger.WarnLevel, "data in used", functioncaller.PrintFuncName(), "data-in-used")
+		return errors.New("data in used")
 	}
 	err = repository.Delete(model)
 	if err != nil {

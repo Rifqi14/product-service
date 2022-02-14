@@ -28,7 +28,7 @@ func (repo MaterialCategoryRepository) List(search, orderBy, sort string, limit,
 	return res, count, nil
 }
 
-func (repo MaterialCategoryRepository) Detail(materialCatId uuid.UUID) (res models.MaterialCategory, err error) {
+func (repo MaterialCategoryRepository) Detail(materialCatId uuid.UUID) (res *models.MaterialCategory, err error) {
 	tx := repo.DB
 
 	err = tx.Find(&res, "id = ?", materialCatId).Error

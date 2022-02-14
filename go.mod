@@ -14,7 +14,7 @@ require (
 	github.com/gosimple/slug v1.12.0
 	github.com/joho/godotenv v1.4.0
 	gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220201222156-72eb609ce177
-	gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20220118071751-50c484663232
+	gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20220203042242-a2543b73b8f7
 	gorm.io/gorm v1.22.5
 )
 

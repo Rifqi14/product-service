@@ -36,4 +36,22 @@ func (routers Routers) ProductRoute() {
 		Handler:    routers.Handler,
 	}
 	genderRoutes.GenderRoute()
+
+	labelRoutes := LabelRouters{
+		RouteGroup: apiV1,
+		Handler:    routers.Handler,
+	}
+	labelRoutes.LabelRoute()
+
+	materialRoutes := MaterialRouters{
+		RouteGroup: apiV1,
+		Handler:    routers.Handler,
+	}
+	materialRoutes.MaterialRoute()
+
+	productRoutes := ProductRouters{
+		RouteGroup: apiV1,
+		Handler:    routers.Handler,
+	}
+	productRoutes.ProductRoute()
 }

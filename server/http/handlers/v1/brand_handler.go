@@ -34,7 +34,7 @@ func (handler BrandHandler) Create(ctx *fiber.Ctx) (err error) {
 	uc := v1.NewBrandUsecase(handler.UcContract)
 	res, err := uc.Create(req)
 	if err != nil {
-		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataStored, err)).Send(ctx)
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataStoredError, err)).Send(ctx)
 	}
 
 	return responses.NewResponse(responses.ResponseSuccess(res, nil, messages.DataStored)).Send(ctx)
@@ -64,7 +64,7 @@ func (handler BrandHandler) Update(ctx *fiber.Ctx) (err error) {
 
 func (handler BrandHandler) List(ctx *fiber.Ctx) (err error) {
 	req := new(request.Pagination)
-	if err := ctx.BodyParser(req); err != nil {
+	if err := ctx.QueryParser(req); err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
 	}
 	if err := handler.Validate.Struct(req); err != nil {
