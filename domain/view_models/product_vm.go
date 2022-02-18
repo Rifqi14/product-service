@@ -129,7 +129,9 @@ func (vm BuildProductVm) BuildExport(products []models.Product) (res []ProductEx
 			productVm.Size = strconv.Itoa(int(variant.Size))
 			productVm.Stock = strconv.Itoa(int(variant.Stock))
 			productVm.SKU = *variant.Sku
-			productVm.Description = *product.Description
+			if product.Description != nil {
+				productVm.Description = *product.Description
+			}
 			productVm.Length = strconv.Itoa(int(product.Length))
 			productVm.Width = strconv.Itoa(int(product.Width))
 			productVm.Height = strconv.Itoa(int(product.Height))
