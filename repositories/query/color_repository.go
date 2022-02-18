@@ -52,3 +52,13 @@ func (repo ColorRepository) Parent(parentId uuid.UUID) (res []models.Color, err 
 	}
 	return res, nil
 }
+
+func (repo ColorRepository) All() (res []models.Color, err error) {
+	tx := repo.DB
+
+	err = tx.Preload("Parent.Parent.Parent.Parent.Parent").Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

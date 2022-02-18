@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"github.com/google/uuid"
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/request"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/view_models"
 )
@@ -17,7 +18,7 @@ type IBrandUsecase interface {
 
 	Delete(ID uuid.UUID) (err error)
 
-	Export(fileType string) (err error)
+	Export(fileType string) (link *fileVm.FileVm, err error)
 
 	Banned(req *request.BannedBrandRequest, brandID uuid.UUID) (res view_models.BrandDetailVm, err error)
 }

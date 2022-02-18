@@ -13,6 +13,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gosimple/slug v1.12.0
 	github.com/joho/godotenv v1.4.0
+	github.com/xuri/excelize/v2 v2.5.0
 	gitlab.com/s2.1-backend/shm-file-management-svc v0.0.0-20220201222156-72eb609ce177
 	gitlab.com/s2.1-backend/shm-package-svc v0.0.0-20220203042242-a2543b73b8f7
 	gorm.io/gorm v1.22.5
@@ -20,7 +21,12 @@ require (
 
 require (
 	github.com/gosimple/unidecode v1.0.1 // indirect
+	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
+	github.com/richardlehane/mscfb v1.0.3 // indirect
+	github.com/richardlehane/msoleps v1.0.1 // indirect
+	github.com/xuri/efp v0.0.0-20210322160811-ab561f5b45e3 // indirect
 	gitlab.com/s2.1-backend/shm-role-svc v0.0.0-20211213083926-b0fabc7bbc28 // indirect
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 )
 
 require (

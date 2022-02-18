@@ -12,4 +12,6 @@ type IMaterialCategoryHandler interface {
 	Update(ctx *fiber.Ctx) (err error)
 
 	Delete(ctx *fiber.Ctx) (err error)
+
+	Export(ctx *fiber.Ctx) (err error)
 }

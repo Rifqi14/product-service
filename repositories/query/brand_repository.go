@@ -41,3 +41,13 @@ func (repo BrandRepository) Detail(brandID uuid.UUID) (res models.Brand, err err
 	}
 	return res, nil
 }
+
+func (repo BrandRepository) All() (res []models.Brand, err error) {
+	db := repo.DB
+
+	err = db.Preload(clause.Associations).Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

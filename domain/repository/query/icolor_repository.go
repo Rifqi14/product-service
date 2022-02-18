@@ -11,4 +11,6 @@ type IColorRepository interface {
 	Detail(colorID uuid.UUID) (res models.Color, err error)
 
 	Parent(parentId uuid.UUID) (res []models.Color, err error)
+
+	All() (res []models.Color, err error)
 }

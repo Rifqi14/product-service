@@ -1,6 +1,8 @@
 package view_models
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	adminVm "gitlab.com/s2.1-backend/shm-auth-svc/domain/view_models"
@@ -61,13 +63,83 @@ type PreOrderVm struct {
 	PoDay    int  `json:"po_day"`
 }
 
+type ProductExportVm struct {
+	Name        string `json:"name"`
+	Brand       string `json:"brand"`
+	Category    string `json:"category"`
+	Label       string `json:"label"`
+	Material    string `json:"material"`
+	Gender      string `json:"gender"`
+	NormalPrice string `json:"normal_price"`
+	StripePrice string `json:"stripe_price"`
+	Discount    string `json:"discount"`
+	Color       string `json:"color"`
+	Size        string `json:"size"`
+	Stock       string `json:"stock"`
+	SKU         string `json:"sku"`
+	Description string `json:"description"`
+	Length      string `json:"length"`
+	Width       string `json:"width"`
+	Height      string `json:"height"`
+	PoDay       string `json:"po_day"`
+}
+
 type BuildProductVm struct {
-	List   []*ProductVm `json:"list_product"`
-	Detail *ProductVm   `json:"detail_product"`
+	List   []*ProductVm      `json:"list_product"`
+	Detail *ProductVm        `json:"detail_product"`
+	Export []ProductExportVm `json:"export_product"`
 }
 
 func NewProductVm() *BuildProductVm {
 	return &BuildProductVm{}
+}
+
+func (vm BuildProductVm) BuildExport(products []models.Product) (res []ProductExportVm) {
+	var categories []string
+	var labels []string
+	var materials []string
+	var genders []string
+	for _, product := range products {
+		for _, variant := range product.Variants {
+			var productVm ProductExportVm
+			productVm.Name = product.Name
+			if product.Brand != nil {
+				productVm.Brand = product.Brand.Name
+			}
+			for _, category := range product.Categories {
+				categories = append(categories, category.Name)
+			}
+			for _, label := range product.Labels {
+				labels = append(labels, label.Name)
+			}
+			for _, material := range product.Materials {
+				materials = append(materials, material.Name)
+			}
+			for _, gender := range product.Genders {
+				genders = append(genders, gender.Name)
+			}
+			productVm.Category = strings.Join(categories, ", ")
+			productVm.Label = strings.Join(labels, ", ")
+			productVm.Material = strings.Join(materials, ", ")
+			productVm.Gender = strings.Join(genders, ", ")
+			productVm.NormalPrice = strconv.Itoa(int(product.NormalPrice))
+			productVm.StripePrice = strconv.Itoa(int(product.StripePrice))
+			productVm.Discount = strconv.Itoa(int(product.DiscountPrice))
+			productVm.Color = variant.Color.Name
+			productVm.Size = strconv.Itoa(int(variant.Size))
+			productVm.Stock = strconv.Itoa(int(variant.Stock))
+			productVm.SKU = *variant.Sku
+			if product.Description != nil {
+				productVm.Description = *product.Description
+			}
+			productVm.Length = strconv.Itoa(int(product.Length))
+			productVm.Width = strconv.Itoa(int(product.Width))
+			productVm.Height = strconv.Itoa(int(product.Height))
+			productVm.PoDay = strconv.Itoa(int(product.PoDay))
+			res = append(res, productVm)
+		}
+	}
+	return res
 }
 
 func (vm BuildProductVm) BuildList(products []*models.Product) (res []*ProductVm) {

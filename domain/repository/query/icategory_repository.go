@@ -11,4 +11,6 @@ type ICategoryRepository interface {
 	Detail(categoryID *uuid.UUID) (res models.Category, err error)
 
 	Parent(parentId uuid.UUID) (res []models.Category, err error)
+
+	All() (res []models.Category, err error)
 }

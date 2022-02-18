@@ -7,12 +7,26 @@ type MaterialCategoryDetailVm struct {
 	Name string `json:"name"`
 }
 
+type MaterialCategoryExportVm struct {
+	Name string `json:"name"`
+}
+
 type MaterialCategoryVm struct {
 	Detail MaterialCategoryDetailVm `json:"detail_material_category"`
+	Export MaterialCategoryExportVm `json:"export_material_category"`
 }
 
 func NewMaterialCategoryVm() MaterialCategoryVm {
 	return MaterialCategoryVm{}
+}
+
+func (vm MaterialCategoryVm) BuildExport(categories []models.MaterialCategory) (res []MaterialCategoryExportVm) {
+	for _, category := range categories {
+		var categoryVm MaterialCategoryExportVm
+		categoryVm.Name = category.Name
+		res = append(res, categoryVm)
+	}
+	return res
 }
 
 func (vm MaterialCategoryVm) BuildDetail(materialCat *models.MaterialCategory) (res *MaterialCategoryDetailVm) {

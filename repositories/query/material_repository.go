@@ -63,3 +63,13 @@ func (repo MaterialRepository) GetBy(column, operator string, value interface{})
 	}
 	return res, nil
 }
+
+func (repo MaterialRepository) All() (res []models.Material, err error) {
+	tx := repo.DB
+
+	err = tx.Preload(clause.Associations).Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

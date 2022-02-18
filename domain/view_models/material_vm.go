@@ -15,18 +15,38 @@ type MaterialDetailVm struct {
 	Parent           *MaterialParentVm        `json:"material_parent"`
 }
 
+type MaterialExportVm struct {
+	Category string `json:"category"`
+	Name     string `json:"name"`
+	Parent   string `json:"parent"`
+}
+
 type MaterialParentVm struct {
 	ID   string `json:"parent_id"`
 	Name string `json:"name"`
 }
 
 type MaterialVm struct {
-	List   MaterialListVm   `json:"list_material"`
-	Detail MaterialDetailVm `json:"detail_material"`
+	List   MaterialListVm     `json:"list_material"`
+	Detail MaterialDetailVm   `json:"detail_material"`
+	Export []MaterialExportVm `json:"export_material"`
 }
 
 func NewMaterialVm() MaterialVm {
 	return MaterialVm{}
+}
+
+func (vm MaterialVm) BuildExport(materials []models.Material) (res []MaterialExportVm) {
+	for _, material := range materials {
+		var materialVm MaterialExportVm
+		materialVm.Name = material.Name
+		materialVm.Category = material.Category.Name
+		if material.Parent != nil {
+			materialVm.Parent = material.Parent.Name
+		}
+		res = append(res, materialVm)
+	}
+	return res
 }
 
 func (vm MaterialVm) BuildList(materials []models.Material) (res []MaterialListVm) {

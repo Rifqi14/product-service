@@ -1,9 +1,14 @@
 package v1
 
 import (
+	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
@@ -189,8 +194,41 @@ func (uc LabelUsecase) Delete(labelId uuid.UUID) (err error) {
 	return nil
 }
 
-func (uc LabelUsecase) Export(fileType string) (err error) {
-	panic("Under development")
+func (uc LabelUsecase) Export(fileType string) (link *fileVm.FileVm, err error) {
+	db := uc.DB
+	repo := query.NewQueryLabelRepository(db)
+
+	labels, err := repo.All()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get-all-labels")
+		return nil, err
+	}
+	labelsVm := view_models.NewLabelVm().BuildExport(labels)
+	f := excelize.NewFile()
+	sheet := "Label"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Set header table
+	f.SetCellValue(sheet, "A1", "Nama Label")
+	f.SetCellValue(sheet, "B1", "Parent Label")
+
+	for i, labelVm := range labelsVm {
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", i+2), labelVm.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", i+2), labelVm.Parent)
+	}
+	filename := fmt.Sprintf("%d_label.xlsx", time.Now().Unix())
+	if err := f.SaveAs("../../domain/files/" + filename); err != nil {
+		return nil, err
+	}
+	link, err = uc.ExportBase(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = os.Remove("../../domain/files/" + filename)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
 }
 
 func (uc LabelUsecase) createPath(labelId *uuid.UUID, path []string) (paths []string, err error) {

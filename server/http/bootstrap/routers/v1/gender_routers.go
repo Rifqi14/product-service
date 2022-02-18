@@ -23,4 +23,5 @@ func (route GenderRouters) GenderRoute() {
 	genderRoutes.Post("", handler.Create)
 	genderRoutes.Patch("/:id", handler.Update)
 	genderRoutes.Delete("/:id", handler.Delete)
+	genderRoutes.Get("/export", handler.Export)
 }

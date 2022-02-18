@@ -2,9 +2,14 @@ package v1
 
 import (
 	"errors"
+	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
@@ -196,8 +201,43 @@ func (uc ColorUsecase) Delete(colorID uuid.UUID) (err error) {
 	return nil
 }
 
-func (uc ColorUsecase) Export(fileType string) (err error) {
-	panic("Under development")
+func (uc ColorUsecase) Export(fileType string) (link *fileVm.FileVm, err error) {
+	db := uc.DB
+	repo := query.NewQueryColorRepository(db)
+
+	colors, err := repo.All()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get-all-colors")
+		return nil, err
+	}
+	colorsVm := view_models.NewColorVm().BuildExport(colors)
+	f := excelize.NewFile()
+	sheet := "Color"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Set header table
+	f.SetCellValue(sheet, "A1", "Nama Warna")
+	f.SetCellValue(sheet, "B1", "Kode Hex")
+	f.SetCellValue(sheet, "C1", "Parent Warna")
+
+	for i, colorVm := range colorsVm {
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", i+2), colorVm.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", i+2), colorVm.Hex)
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", i+2), colorVm.Parent)
+	}
+	filename := fmt.Sprintf("%d_color.xlsx", time.Now().Unix())
+	if err := f.SaveAs("../../domain/files/" + filename); err != nil {
+		return nil, err
+	}
+	link, err = uc.ExportBase(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = os.Remove("../../domain/files/" + filename)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
 }
 
 func (uc ColorUsecase) createPath(colorId *uuid.UUID, path []string) (paths []string, err error) {
