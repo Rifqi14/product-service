@@ -216,23 +216,23 @@ func (vm BrandVm) BuildDetail(brand *models.Brand) (res BrandDetailVm) {
 		mobile = view_models.NewFileVm().Build(*brand.BannerMobile)
 	}
 	if brand != nil {
-		res = BrandDetailVm{
-			ID:              brand.ID.String(),
-			Name:            brand.Name,
-			Slug:            brand.Slug,
-			Title:           brand.Title,
-			Catchphrase:     brand.Catchphrase,
-			Status:          brand.Status,
-			Logo:            logo,
-			WebBanner:       web,
-			MobileBanner:    mobile,
-			CreatedAt:       brand.CreatedAt.Format("01-02-2006"),
-			Owner:           "",
-			EstablishedDate: brand.EstablishedDate.Format("01-02-2006"),
-			About:           brand.About,
-			Platform:        NewBrandMediaSocialVm().Build(brand.MediaSocials),
-			Banned:          vm.BuildLog(brand.Logs),
+		res.ID = brand.ID.String()
+		res.Name = brand.Name
+		res.Slug = brand.Slug
+		res.Title = brand.Title
+		res.Catchphrase = brand.Catchphrase
+		res.Status = brand.Status
+		res.Logo = logo
+		res.WebBanner = web
+		res.MobileBanner = mobile
+		res.CreatedAt = brand.CreatedAt.Format("01-02-2006")
+		res.Owner = ""
+		res.EstablishedDate = brand.EstablishedDate.Format("01-02-2006")
+		res.About = brand.About
+		if len(brand.MediaSocials) > 0 {
+			res.Platform = NewBrandMediaSocialVm().Build(brand.MediaSocials)
 		}
+		res.Banned = vm.BuildLog(brand.Logs)
 	}
 	return res
 }
@@ -241,14 +241,18 @@ func (vm BrandVm) BuildLog(logs []*models.BrandLog) (res []*BrandLogVm) {
 	if len(logs) > 0 {
 		for _, log := range logs {
 			var attachment *view_models.FileVm
+			var username string
 			if log.Attachment != nil {
 				attachmentVm := view_models.NewFileVm().Build(*log.Attachment)
 				attachment = &attachmentVm
 			}
+			if log.Verifier.Email != "" {
+				username = *log.Verifier.Username
+			}
 			res = append(res, &BrandLogVm{
 				Status:   log.Status,
 				Reason:   log.Reason,
-				Verifier: *log.Verifier.Username,
+				Verifier: username,
 				Document: attachment,
 			})
 		}
