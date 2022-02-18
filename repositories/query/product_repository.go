@@ -62,7 +62,7 @@ func (repo ProductRepository) Detail(productId uuid.UUID) (res *models.Product, 
 func (repo ProductRepository) FindBy(column, operator string, value interface{}) (res []*models.Product, err error) {
 	tx := repo.DB
 
-	err = tx.Preload(clause.Associations).Preload("Variants."+clause.Associations).Preload("Images."+clause.Associations).Preload("Logs."+clause.Associations).Preload("Brand."+clause.Associations).Preload("Categories."+clause.Associations).Find(&res, column+" "+operator+" ?", value).Error
+	err = tx.Preload(clause.Associations).Preload("Variants.Color."+clause.Associations).Preload("Images."+clause.Associations).Preload("Logs."+clause.Associations).Preload("Brand."+clause.Associations).Preload("Categories."+clause.Associations).Find(&res, column+" "+operator+" ?", value).Error
 	if err != nil {
 		return nil, err
 	}
