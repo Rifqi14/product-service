@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -42,7 +43,7 @@ func (handler CategoryHandler) Create(ctx *fiber.Ctx) (err error) {
 
 func (handler CategoryHandler) List(ctx *fiber.Ctx) (err error) {
 	req := new(request.Pagination)
-	if err := ctx.BodyParser(req); err != nil {
+	if err := ctx.QueryParser(req); err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
 	}
 	if err := handler.Validate.Struct(req); err != nil {
@@ -112,5 +113,16 @@ func (handler CategoryHandler) Delete(ctx *fiber.Ctx) (err error) {
 }
 
 func (handler CategoryHandler) Export(ctx *fiber.Ctx) (err error) {
-	panic("Under development")
+	fileType := ctx.Params("type")
+	if !handlers.FileType(fileType).IsValid() {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, errors.New("failed file type"))).Send(ctx)
+	}
+
+	uc := v1.NewCategoryUsecase(handler.UcContract)
+	res, err := uc.Export(fileType)
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.DataNotFound, err)).Send(ctx)
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "data success export")).Send(ctx)
 }

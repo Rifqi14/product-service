@@ -1,9 +1,14 @@
 package v1
 
 import (
+	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
@@ -133,6 +138,7 @@ func (uc CategoryUsecase) Update(req *request.CategoryRequest, categoryID uuid.U
 		return res, err
 	}
 	category, err := repository.Update(model)
+	tx.Model(&category).Update("parent_id", req.ParentID)
 	if err != nil {
 		tx.Rollback()
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-create-category")
@@ -194,8 +200,41 @@ func (uc CategoryUsecase) Delete(categoryID uuid.UUID) (err error) {
 	return nil
 }
 
-func (uc CategoryUsecase) Export(fileType string) (err error) {
-	panic("Under development")
+func (uc CategoryUsecase) Export(fileType string) (link *fileVm.FileVm, err error) {
+	db := uc.DB
+	repo := query.NewQueryCategoryRepository(db)
+
+	categories, err := repo.All()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get-all-categories")
+		return nil, err
+	}
+	categoriesVm := view_models.NewCategoryVm().BuildExport(categories)
+	f := excelize.NewFile()
+	sheet := "Category"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Set header
+	f.SetCellValue(sheet, "A1", "Nama Kategori")
+	f.SetCellValue(sheet, "B1", "Parent Kategori")
+
+	for i, categoryVm := range categoriesVm {
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", i+2), categoryVm.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", i+2), categoryVm.Parent)
+	}
+	filename := fmt.Sprintf("%d_category.xlsx", time.Now().Unix())
+	if err := f.SaveAs("../../domain/files/" + filename); err != nil {
+		return nil, err
+	}
+	link, err = uc.ExportBase(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = os.Remove("../../domain/files/" + filename)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
 }
 
 func (uc CategoryUsecase) createPath(categoryId *uuid.UUID, path []string) (paths []string, err error) {

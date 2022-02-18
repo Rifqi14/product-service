@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,4 +31,13 @@ type Category struct {
 	WebsiteBanner       *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	MobileHeroBanner    *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	WebsiteHeroBanner   *models.File `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Products            []*Product   `gorm:"many2many:product_categories"`
+}
+
+func (c *Category) BeforeDelete(tx *gorm.DB) error {
+	count := tx.Model(&c).Association("Products").Count()
+	if count > 0 {
+		return errors.New("data in used")
+	}
+	return nil
 }

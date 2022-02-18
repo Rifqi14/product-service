@@ -1,7 +1,14 @@
 package v1
 
 import (
+	"errors"
+	"fmt"
+	"os"
+	"time"
+
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
@@ -126,6 +133,16 @@ func (uc MaterialCategoryUsecase) Update(req *request.MaterialCategoryRequest, m
 func (uc MaterialCategoryUsecase) Delete(materialCatId uuid.UUID) (err error) {
 	db := uc.DB
 	repo := command.NewCommandMaterialCategoryRepository(db)
+	materialRepo := query.NewQueryMaterialRepository(db)
+	material, err := materialRepo.GetBy("material_category_id", "=", materialCatId)
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get data material")
+		return err
+	}
+	if len(material) > 0 {
+		logruslogger.Log(logruslogger.WarnLevel, "cannot delete material category, in use in material", functioncaller.PrintFuncName(), "material-category-use")
+		return errors.New("cannot delete material category, in use in material")
+	}
 
 	userId, err := uuid.Parse(uc.UserID)
 	if err != nil {
@@ -152,6 +169,37 @@ func (uc MaterialCategoryUsecase) Delete(materialCatId uuid.UUID) (err error) {
 	return nil
 }
 
-func (uc MaterialCategoryUsecase) Export(fileType string) (err error) {
-	panic("Under development")
+func (uc MaterialCategoryUsecase) Export(fileType string) (link *fileVm.FileVm, err error) {
+	db := uc.DB
+	repo := query.NewQueryMaterialCategoryRepository(db)
+
+	categories, err := repo.All()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get-all-categories")
+		return nil, err
+	}
+	categoriesVm := view_models.NewMaterialCategoryVm().BuildExport(categories)
+	f := excelize.NewFile()
+	sheet := "Material Category"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Set header table
+	f.SetCellValue(sheet, "A1", "Nama material kategori")
+
+	for i, categoryVm := range categoriesVm {
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", i+2), categoryVm.Name)
+	}
+	filename := fmt.Sprintf("%d_material_category.xlsx", time.Now().Unix())
+	if err := f.SaveAs("../../domain/files/" + filename); err != nil {
+		return nil, err
+	}
+	link, err = uc.ExportBase(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = os.Remove("../../domain/files/" + filename)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
 }

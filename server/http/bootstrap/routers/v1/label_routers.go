@@ -23,4 +23,5 @@ func (route LabelRouters) LabelRoute() {
 	labelRoutes.Post("", handler.Create)
 	labelRoutes.Patch("/:id", handler.Update)
 	labelRoutes.Delete("/:id", handler.Delete)
+	labelRoutes.Get("/export", handler.Export)
 }

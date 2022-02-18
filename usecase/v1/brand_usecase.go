@@ -1,10 +1,14 @@
 package v1
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/gosimple/slug"
+	"github.com/xuri/excelize/v2"
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
@@ -15,6 +19,8 @@ import (
 	"gitlab.com/s2.1-backend/shm-product-svc/repositories/query"
 	"gitlab.com/s2.1-backend/shm-product-svc/usecase"
 )
+
+var headerExport = []string{"Nomor", "Nama brand", "Tgl brand berdiri", "Title Brand", "Jargon Brand", "Tentang Brand", "website", "instagram", "tiktok", "facebook", "twitter", "email", "sosmed lainnya"}
 
 type BrandUsecase struct {
 	*usecase.Contract
@@ -177,11 +183,67 @@ func (uc BrandUsecase) Delete(brandID uuid.UUID) (err error) {
 		return err
 	}
 
+	tx.Commit()
 	return nil
 }
 
-func (uc BrandUsecase) Export(fileType string) (err error) {
-	panic("Under Maintenance")
+func (uc BrandUsecase) Export(fileType string) (link *fileVm.FileVm, err error) {
+	db := uc.DB
+	repo := query.NewQueryBrandRepository(db)
+
+	brands, err := repo.All()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get-all-brands")
+		return nil, err
+	}
+	brandsVm, _ := view_models.NewBrandVm().BuildExport(brands)
+	f := excelize.NewFile()
+	sheet := "Brand"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Set header
+	f.SetCellValue(sheet, "A1", headerExport[0])
+	f.SetCellValue(sheet, "B1", headerExport[1])
+	f.SetCellValue(sheet, "C1", headerExport[2])
+	f.SetCellValue(sheet, "D1", headerExport[3])
+	f.SetCellValue(sheet, "E1", headerExport[4])
+	f.SetCellValue(sheet, "F1", headerExport[5])
+	f.SetCellValue(sheet, "G1", headerExport[6])
+	f.SetCellValue(sheet, "H1", headerExport[7])
+	f.SetCellValue(sheet, "I1", headerExport[8])
+	f.SetCellValue(sheet, "J1", headerExport[9])
+	f.SetCellValue(sheet, "K1", headerExport[10])
+	f.SetCellValue(sheet, "L1", headerExport[11])
+	f.SetCellValue(sheet, "M1", headerExport[12])
+
+	for i, brandVm := range brandsVm {
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", i+2), brandVm.Number)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", i+2), brandVm.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", i+2), brandVm.EstablishedDate)
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", i+2), brandVm.Title)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", i+2), brandVm.Catchphrase)
+		f.SetCellValue(sheet, fmt.Sprintf("F%d", i+2), brandVm.About)
+		f.SetCellValue(sheet, fmt.Sprintf("G%d", i+2), brandVm.Website)
+		f.SetCellValue(sheet, fmt.Sprintf("H%d", i+2), brandVm.Instagram)
+		f.SetCellValue(sheet, fmt.Sprintf("I%d", i+2), brandVm.Tiktok)
+		f.SetCellValue(sheet, fmt.Sprintf("J%d", i+2), brandVm.Facebook)
+		f.SetCellValue(sheet, fmt.Sprintf("K%d", i+2), brandVm.Twitter)
+		f.SetCellValue(sheet, fmt.Sprintf("L%d", i+2), brandVm.Email)
+		f.SetCellValue(sheet, fmt.Sprintf("M%d", i+2), brandVm.Other)
+	}
+	filename := fmt.Sprintf("%d_brand.xlsx", time.Now().Unix())
+	if err := f.SaveAs("../../domain/files/" + filename); err != nil {
+		return nil, err
+	}
+	link, err = uc.ExportBase(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = os.Remove("../../domain/files/" + filename)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
 }
 
 func (uc BrandUsecase) Banned(req *request.BannedBrandRequest, brandID uuid.UUID) (res view_models.BrandDetailVm, err error) {

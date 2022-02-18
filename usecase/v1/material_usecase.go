@@ -1,9 +1,15 @@
 package v1
 
 import (
+	"errors"
+	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
@@ -181,6 +187,11 @@ func (uc MaterialUsecase) Delete(materialId uuid.UUID) (err error) {
 		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "gorm-start-transaction")
 		return err
 	}
+	count := tx.Model(model).Association("Products").Count()
+	if count > 0 {
+		logruslogger.Log(logruslogger.WarnLevel, "data in used", functioncaller.PrintFuncName(), "data-in-used")
+		return errors.New("data in used")
+	}
 	err = repo.Delete(model)
 	if err != nil {
 		tx.Rollback()
@@ -191,8 +202,43 @@ func (uc MaterialUsecase) Delete(materialId uuid.UUID) (err error) {
 	return nil
 }
 
-func (uc MaterialUsecase) Export(fileType string) (err error) {
-	panic("Under development")
+func (uc MaterialUsecase) Export(fileType string) (link *fileVm.FileVm, err error) {
+	db := uc.DB
+	repo := query.NewQueryMaterialRepository(db)
+
+	materials, err := repo.All()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get-all-materials")
+		return nil, err
+	}
+	materialsVm := view_models.NewMaterialVm().BuildExport(materials)
+	f := excelize.NewFile()
+	sheet := "Material"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Set header table
+	f.SetCellValue(sheet, "A1", "Kategori Material")
+	f.SetCellValue(sheet, "B1", "Nama Material")
+	f.SetCellValue(sheet, "C1", "Parent Material")
+
+	for i, materialVm := range materialsVm {
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", i+2), materialVm.Category)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", i+2), materialVm.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", i+2), materialVm.Parent)
+	}
+	filename := fmt.Sprintf("%d_material.xlsx", time.Now().Unix())
+	if err := f.SaveAs("../../domain/files/" + filename); err != nil {
+		return nil, err
+	}
+	link, err = uc.ExportBase(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = os.Remove("../../domain/files/" + filename)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
 }
 
 func (uc MaterialUsecase) createPath(materialId *uuid.UUID, path []string) (paths []string, err error) {

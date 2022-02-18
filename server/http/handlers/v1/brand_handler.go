@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -34,7 +35,7 @@ func (handler BrandHandler) Create(ctx *fiber.Ctx) (err error) {
 	uc := v1.NewBrandUsecase(handler.UcContract)
 	res, err := uc.Create(req)
 	if err != nil {
-		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataStored, err)).Send(ctx)
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataStoredError, err)).Send(ctx)
 	}
 
 	return responses.NewResponse(responses.ResponseSuccess(res, nil, messages.DataStored)).Send(ctx)
@@ -64,7 +65,7 @@ func (handler BrandHandler) Update(ctx *fiber.Ctx) (err error) {
 
 func (handler BrandHandler) List(ctx *fiber.Ctx) (err error) {
 	req := new(request.Pagination)
-	if err := ctx.BodyParser(req); err != nil {
+	if err := ctx.QueryParser(req); err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
 	}
 	if err := handler.Validate.Struct(req); err != nil {
@@ -112,7 +113,18 @@ func (handler BrandHandler) Delete(ctx *fiber.Ctx) (err error) {
 }
 
 func (handler BrandHandler) Export(ctx *fiber.Ctx) (err error) {
-	panic("Under Maintenance")
+	fileType := ctx.Params("type")
+	if !handlers.FileType(fileType).IsValid() {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, errors.New("failed file type"))).Send(ctx)
+	}
+
+	uc := v1.NewBrandUsecase(handler.UcContract)
+	res, err := uc.Export(fileType)
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.DataNotFound, err)).Send(ctx)
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "data success export")).Send(ctx)
 }
 
 func (handler BrandHandler) Banned(ctx *fiber.Ctx) (err error) {

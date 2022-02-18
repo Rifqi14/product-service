@@ -19,6 +19,11 @@ type LabelParentVm struct {
 	Name string `json:"name"`
 }
 
+type LabelExportVm struct {
+	Name   string `json:"name"`
+	Parent string `json:"parent"`
+}
+
 type LabelVm struct {
 	List   LabelListVm   `json:"list_label"`
 	Detail LabelDetailVm `json:"detail_label"`
@@ -26,6 +31,18 @@ type LabelVm struct {
 
 func NewLabelVm() LabelVm {
 	return LabelVm{}
+}
+
+func (vm LabelVm) BuildExport(labels []models.Label) (res []LabelExportVm) {
+	for _, label := range labels {
+		var labelVm LabelExportVm
+		labelVm.Name = label.Name
+		if label.Parent != nil {
+			labelVm.Parent = label.Parent.Name
+		}
+		res = append(res, labelVm)
+	}
+	return res
 }
 
 func (vm LabelVm) BuildList(labels []models.Label) (res []LabelListVm) {

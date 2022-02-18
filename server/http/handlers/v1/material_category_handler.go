@@ -42,7 +42,7 @@ func (handler MaterialCategoryHandler) Create(ctx *fiber.Ctx) (err error) {
 
 func (handler MaterialCategoryHandler) List(ctx *fiber.Ctx) (err error) {
 	req := new(request.Pagination)
-	if err := ctx.BodyParser(req); err != nil {
+	if err := ctx.QueryParser(req); err != nil {
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
 	}
 	if err != nil {
@@ -116,5 +116,16 @@ func (handler MaterialCategoryHandler) Delete(ctx *fiber.Ctx) (err error) {
 }
 
 func (handler MaterialCategoryHandler) Export(ctx *fiber.Ctx) (err error) {
-	panic("Under development")
+	fileType := ctx.Query("type")
+	if !handlers.FileType(fileType).IsValid() {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
+	}
+
+	uc := v1.NewMaterialCategoryUsecase(handler.UcContract)
+	res, err := uc.Export(fileType)
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.DataNotFound, err)).Send(ctx)
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "data suuccessexport")).Send(ctx)
 }

@@ -53,3 +53,13 @@ func (repo LabelRepository) Parent(parentId uuid.UUID) (res []models.Label, err 
 	}
 	return res, nil
 }
+
+func (repo LabelRepository) All() (res []models.Label, err error) {
+	tx := repo.DB
+
+	err = tx.Preload("Parent.Parent.Parent.Parent.Parent").Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

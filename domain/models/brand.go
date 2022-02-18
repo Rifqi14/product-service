@@ -1,10 +1,12 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"gitlab.com/s2.1-backend/shm-file-management-svc/domain/models"
+	"gitlab.com/s2.1-backend/shm-package-svc/messages"
 	"gorm.io/gorm"
 )
 
@@ -27,8 +29,23 @@ type Brand struct {
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt
 	MediaSocials    []BrandMediaSocial `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Logs            []BrandLog         `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Logs            []*BrandLog        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Logo            *models.File       `gorm:"foreignKey:LogoID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BannerWeb       *models.File       `gorm:"foreignKey:BannerWebID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	BannerMobile    *models.File       `gorm:"foreignKey:BannerMobileID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Products        []*Product         `gorm:"foreignKey:BrandID;references:ID;"`
+}
+
+func (b *Brand) BeforeDelete(tx *gorm.DB) error {
+	tx.First(&b, b.ID)
+	if b.Name == "" {
+		return errors.New(messages.DataNotFound)
+	}
+	var countSeller int64
+	countProducts := tx.Model(&b).Association("Products").Count()
+	tx.Table("seller_brands").Where("brand_id = ?", b.ID).Count(&countSeller)
+	if countSeller > 0 || countProducts > 0 {
+		return errors.New("data in used")
+	}
+	return nil
 }
