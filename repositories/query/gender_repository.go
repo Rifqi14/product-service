@@ -53,3 +53,13 @@ func (repo GenderRepository) Parent(parentId uuid.UUID) (res []models.Gender, er
 	}
 	return res, nil
 }
+
+func (repo GenderRepository) All() (res []models.Gender, err error) {
+	tx := repo.DB
+
+	err = tx.Preload("Parent.Parent.Parent.Parent.Parent").Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

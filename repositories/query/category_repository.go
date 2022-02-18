@@ -52,3 +52,13 @@ func (repo CategoryRepository) Parent(parentId uuid.UUID) (res []models.Category
 	}
 	return res, nil
 }
+
+func (repo CategoryRepository) All() (res []models.Category, err error) {
+	tx := repo.DB
+
+	err = tx.Preload("Parent.Parent.Parent.Parent.Parent").Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

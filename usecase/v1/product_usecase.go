@@ -2,8 +2,12 @@ package v1
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
 	"gitlab.com/s2.1-backend/shm-package-svc/functioncaller"
 	"gitlab.com/s2.1-backend/shm-package-svc/logruslogger"
 	"gitlab.com/s2.1-backend/shm-package-svc/messages"
@@ -11,11 +15,14 @@ import (
 	"gitlab.com/s2.1-backend/shm-product-svc/repositories/query"
 	"gitlab.com/s2.1-backend/shm-product-svc/usecase"
 
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/request"
 	ucinterface "gitlab.com/s2.1-backend/shm-product-svc/domain/usecase"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/view_models"
 )
+
+var headerExportProduct = []string{"Nama Produk", "Brand Produk", "Kategori", "Label", "Material", "Gender", "Harga Normal", "Harga Coret", "Diskon/Pot.Harga", "Warna", "Ukuran", "stok", "nomor SKU", "deskripsi produk", "detail ukuran", "panjang paket", "lebar paket", "tinggi paket", "waktu proses preorder"}
 
 type ProductUsecase struct {
 	*usecase.Contract
@@ -88,6 +95,16 @@ func (uc ProductUsecase) Create(req *request.ProductRequest) (res *view_models.P
 	res, _ = uc.Detail(product.ID)
 	tx.Commit()
 	return res, nil
+}
+
+func (uc ProductUsecase) FindBy(req *request.FindByRequest) (res []*view_models.ProductVm, pagination view_models.PaginationVm, err error) {
+	// db := uc.DB
+	// repo := query.NewQueryProductRepository(db)
+
+	// offset, limit, page, orderBy, sort := uc.SetPaginationParameter(req.Pagination.Offset, req.Pagination.Limit, req.Pagination.OrderBy, req.Pagination.Sort)
+
+	// products, count, err := repo.FindBy()
+	panic("Under development")
 }
 
 func (uc ProductUsecase) List(req *request.FilterProductRequest) (res []*view_models.ProductVm, pagination view_models.PaginationVm, err error) {
@@ -289,8 +306,75 @@ func (uc ProductUsecase) ChangeStatus(req *request.BannedProductRequest, product
 	return nil
 }
 
-func (uc ProductUsecase) Export(fileType string) (err error) {
-	panic("Under development")
+func (uc ProductUsecase) Export(fileType string) (link *fileVm.FileVm, err error) {
+	db := uc.DB
+	repo := query.NewQueryProductRepository(db)
+
+	products, err := repo.All()
+	if err != nil {
+		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "get-all-products")
+		return nil, err
+	}
+	productsVm := view_models.NewProductVm().BuildExport(products)
+	f := excelize.NewFile()
+	sheet := "Product"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Set header table
+	f.SetCellValue(sheet, "A1", headerExportProduct[0])
+	f.SetCellValue(sheet, "B1", headerExportProduct[1])
+	f.SetCellValue(sheet, "C1", headerExportProduct[2])
+	f.SetCellValue(sheet, "D1", headerExportProduct[3])
+	f.SetCellValue(sheet, "E1", headerExportProduct[4])
+	f.SetCellValue(sheet, "F1", headerExportProduct[5])
+	f.SetCellValue(sheet, "G1", headerExportProduct[6])
+	f.SetCellValue(sheet, "H1", headerExportProduct[7])
+	f.SetCellValue(sheet, "I1", headerExportProduct[8])
+	f.SetCellValue(sheet, "J1", headerExportProduct[9])
+	f.SetCellValue(sheet, "K1", headerExportProduct[10])
+	f.SetCellValue(sheet, "L1", headerExportProduct[11])
+	f.SetCellValue(sheet, "M1", headerExportProduct[12])
+	f.SetCellValue(sheet, "N1", headerExportProduct[13])
+	f.SetCellValue(sheet, "O1", headerExportProduct[14])
+	f.SetCellValue(sheet, "P1", headerExportProduct[15])
+	f.SetCellValue(sheet, "Q1", headerExportProduct[16])
+	f.SetCellValue(sheet, "R1", headerExportProduct[17])
+	f.SetCellValue(sheet, "S1", headerExportProduct[18])
+
+	for i, productVm := range productsVm {
+		f.SetCellValue(sheet, fmt.Sprintf("A%d", i+2), productVm.Name)
+		f.SetCellValue(sheet, fmt.Sprintf("B%d", i+2), productVm.Brand)
+		f.SetCellValue(sheet, fmt.Sprintf("C%d", i+2), productVm.Category)
+		f.SetCellValue(sheet, fmt.Sprintf("D%d", i+2), productVm.Label)
+		f.SetCellValue(sheet, fmt.Sprintf("E%d", i+2), productVm.Material)
+		f.SetCellValue(sheet, fmt.Sprintf("F%d", i+2), productVm.Gender)
+		f.SetCellValue(sheet, fmt.Sprintf("G%d", i+2), productVm.NormalPrice)
+		f.SetCellValue(sheet, fmt.Sprintf("H%d", i+2), productVm.StripePrice)
+		f.SetCellValue(sheet, fmt.Sprintf("I%d", i+2), productVm.Discount)
+		f.SetCellValue(sheet, fmt.Sprintf("J%d", i+2), productVm.Color)
+		f.SetCellValue(sheet, fmt.Sprintf("K%d", i+2), productVm.Size)
+		f.SetCellValue(sheet, fmt.Sprintf("L%d", i+2), productVm.Stock)
+		f.SetCellValue(sheet, fmt.Sprintf("M%d", i+2), productVm.SKU)
+		f.SetCellValue(sheet, fmt.Sprintf("N%d", i+2), productVm.Description)
+		f.SetCellValue(sheet, fmt.Sprintf("O%d", i+2), "")
+		f.SetCellValue(sheet, fmt.Sprintf("P%d", i+2), productVm.Length)
+		f.SetCellValue(sheet, fmt.Sprintf("Q%d", i+2), productVm.Width)
+		f.SetCellValue(sheet, fmt.Sprintf("R%d", i+2), productVm.Height)
+		f.SetCellValue(sheet, fmt.Sprintf("S%d", i+2), productVm.PoDay)
+	}
+	filename := fmt.Sprintf("%d_product.xlsx", time.Now().Unix())
+	if err := f.SaveAs("../../domain/files/" + filename); err != nil {
+		return nil, err
+	}
+	link, err = uc.ExportBase(filename)
+	if err != nil {
+		return nil, err
+	}
+	err = os.Remove("../../domain/files/" + filename)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
 }
 
 func (uc ProductUsecase) appendCategories(req *request.ProductRequest) (res []*models.Category) {

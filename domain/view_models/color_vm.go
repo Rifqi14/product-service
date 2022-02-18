@@ -22,13 +22,33 @@ type ColorParentVm struct {
 	Name string `json:"name"`
 }
 
+type ColorExportVm struct {
+	Name   string `json:"name"`
+	Hex    string `json:"hex_code"`
+	Parent string `json:"parent"`
+}
+
 type ColorVm struct {
-	List   ColorListVm   `json:"list_color"`
-	Detail ColorDetailVm `json:"detail_color"`
+	List   ColorListVm     `json:"list_color"`
+	Detail ColorDetailVm   `json:"detail_color"`
+	Export []ColorExportVm `json:"export_color"`
 }
 
 func NewColorVm() ColorVm {
 	return ColorVm{}
+}
+
+func (vm ColorVm) BuildExport(colors []models.Color) (res []ColorExportVm) {
+	for _, color := range colors {
+		var colorVm ColorExportVm
+		colorVm.Name = color.Name
+		colorVm.Hex = color.RgbCode
+		if color.Parent != nil {
+			colorVm.Parent = color.Parent.Name
+		}
+		res = append(res, colorVm)
+	}
+	return res
 }
 
 func (vm ColorVm) BuildList(colors []models.Color) (res []ColorListVm) {

@@ -111,5 +111,16 @@ func (handler MaterialHandler) Delete(ctx *fiber.Ctx) (err error) {
 }
 
 func (handler MaterialHandler) Export(ctx *fiber.Ctx) (err error) {
-	panic("Under development")
+	fileType := ctx.Query("type")
+	if !handlers.FileType(fileType).IsValid() {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
+	}
+
+	uc := v1.NewMaterialusecase(handler.UcContract)
+	res, err := uc.Export(fileType)
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.DataNotFound, err)).Send(ctx)
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "data suuccess export")).Send(ctx)
 }

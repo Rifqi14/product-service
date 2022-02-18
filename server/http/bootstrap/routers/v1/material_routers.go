@@ -28,7 +28,9 @@ func (route MaterialRouters) MaterialRoute() {
 	materialRoutes.Post("", handlerMaterial.Create)
 	materialRoutes.Patch("/:id", handlerMaterial.Update)
 	materialRoutes.Delete("/:id", handlerMaterial.Delete)
+	materialRoutes.Post("/export", handlerMaterial.Export)
 	categoryRoutes.Post("", handlerMaterialCat.Create)
 	categoryRoutes.Patch("/:id", handlerMaterialCat.Update)
 	categoryRoutes.Delete("/:id", handlerMaterialCat.Delete)
+	categoryRoutes.Post("/export", handlerMaterialCat.Export)
 }

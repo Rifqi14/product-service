@@ -37,3 +37,13 @@ func (repo MaterialCategoryRepository) Detail(materialCatId uuid.UUID) (res *mod
 	}
 	return res, nil
 }
+
+func (repo MaterialCategoryRepository) All() (res []models.MaterialCategory, err error) {
+	tx := repo.DB
+
+	err = tx.Find(&res).Error
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}

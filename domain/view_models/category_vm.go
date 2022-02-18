@@ -35,6 +35,11 @@ type CategoryMediaVm struct {
 	HeroBannerWebsite view_models.FileVm `json:"hero_banner_website"`
 }
 
+type CategoryExportVm struct {
+	Name   string
+	Parent string
+}
+
 type CategoryVm struct {
 	List   CategoryListVm   `json:"list_category"`
 	Detail CategoryDetailVm `json:"detail_category"`
@@ -43,6 +48,18 @@ type CategoryVm struct {
 
 func NewCategoryVm() *CategoryVm {
 	return &CategoryVm{}
+}
+
+func (vm CategoryVm) BuildExport(categories []models.Category) (res []CategoryExportVm) {
+	for _, category := range categories {
+		var categoryVm CategoryExportVm
+		categoryVm.Name = category.Name
+		if category.Parent != nil {
+			categoryVm.Parent = category.Parent.Name
+		}
+		res = append(res, categoryVm)
+	}
+	return res
 }
 
 func (vm CategoryVm) BuildList(categories []models.Category) (res []CategoryListVm) {

@@ -11,4 +11,6 @@ type IProductRepository interface {
 	Detail(productId uuid.UUID) (res *models.Product, err error)
 
 	FindBy(column, operator string, value interface{}) (res []*models.Product, err error)
+
+	All() (res []models.Product, err error)
 }

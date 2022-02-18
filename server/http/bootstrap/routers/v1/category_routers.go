@@ -23,4 +23,5 @@ func (route CategoryRouters) CategoryRoute() {
 	categoryRoutes.Post("", handler.Create)
 	categoryRoutes.Patch("/:id", handler.Update)
 	categoryRoutes.Delete("/:id", handler.Delete)
+	categoryRoutes.Post("/:type", handler.Export)
 }

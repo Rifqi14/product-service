@@ -9,4 +9,6 @@ type IBrandRepository interface {
 	List(search, orderBy, sort string, limit, offset int64) (res []models.Brand, count int64, err error)
 
 	Detail(brandID uuid.UUID) (res models.Brand, err error)
+
+	All() (res []models.Brand, err error)
 }
