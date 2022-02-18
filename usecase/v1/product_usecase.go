@@ -90,6 +90,16 @@ func (uc ProductUsecase) Create(req *request.ProductRequest) (res *view_models.P
 	return res, nil
 }
 
+func (uc ProductUsecase) FindBy(req *request.FindByRequest) (res []*view_models.ProductVm, pagination view_models.PaginationVm, err error) {
+	// db := uc.DB
+	// repo := query.NewQueryProductRepository(db)
+
+	// offset, limit, page, orderBy, sort := uc.SetPaginationParameter(req.Pagination.Offset, req.Pagination.Limit, req.Pagination.OrderBy, req.Pagination.Sort)
+
+	// products, count, err := repo.FindBy()
+	panic("Under development")
+}
+
 func (uc ProductUsecase) List(req *request.FilterProductRequest) (res []*view_models.ProductVm, pagination view_models.PaginationVm, err error) {
 	db := uc.DB
 	repo := query.NewQueryProductRepository(db)

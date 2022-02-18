@@ -73,3 +73,10 @@ type BannedProductRequest struct {
 	AttachmentID string `json:"attachment_id" form:"attachment_id"`
 	Status       bool   `json:"status" form:"status"`
 }
+
+type FindByRequest struct {
+	Column     string      `query:"column"`
+	Operator   string      `query:"operator"`
+	Value      interface{} `query:"value"`
+	Pagination Pagination
+}

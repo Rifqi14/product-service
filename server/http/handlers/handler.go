@@ -19,3 +19,39 @@ type Handler struct {
 	JweCredential jwe.Credential
 	JwtCredential jwt.JwtCredential
 }
+
+type (
+	FileType     string
+	PlatformType string
+)
+
+var (
+	Pdf FileType = "pdf"
+	Csv FileType = "csv"
+)
+
+var (
+	Website   PlatformType = "website"
+	Email     PlatformType = "email"
+	Instagram PlatformType = "instagram"
+	Facebook  PlatformType = "facebook"
+	Tiktok    PlatformType = "tiktok"
+	Twitter   PlatformType = "twitter"
+	Other     PlatformType = "other"
+)
+
+func (ft FileType) IsValid() bool {
+	switch ft {
+	case Pdf, Csv:
+		return true
+	}
+	return false
+}
+
+func (pt PlatformType) IsValid() bool {
+	switch pt {
+	case Website, Email, Instagram, Facebook, Tiktok, Twitter, Other:
+		return true
+	}
+	return false
+}

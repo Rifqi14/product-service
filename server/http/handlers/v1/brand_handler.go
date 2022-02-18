@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -112,7 +113,18 @@ func (handler BrandHandler) Delete(ctx *fiber.Ctx) (err error) {
 }
 
 func (handler BrandHandler) Export(ctx *fiber.Ctx) (err error) {
-	panic("Under Maintenance")
+	fileType := ctx.Params("type")
+	if !handlers.FileType(fileType).IsValid() {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, errors.New("failed file type"))).Send(ctx)
+	}
+
+	uc := v1.NewBrandUsecase(handler.UcContract)
+	res, err := uc.Export(fileType)
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.DataNotFound, err)).Send(ctx)
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "data success export")).Send(ctx)
 }
 
 func (handler BrandHandler) Banned(ctx *fiber.Ctx) (err error) {

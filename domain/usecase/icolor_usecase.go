@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"github.com/google/uuid"
+	fileVm "gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/request"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/view_models"
 )
@@ -17,5 +18,5 @@ type IColorUsecase interface {
 
 	Delete(colorId uuid.UUID) (err error)
 
-	Export(fileType string) (err error)
+	Export(fileType string) (link *fileVm.FileVm, err error)
 }

@@ -11,4 +11,6 @@ type ILabelRepository interface {
 	Detail(labelId uuid.UUID) (res *models.Label, err error)
 
 	Parent(parentId uuid.UUID) (res []models.Label, err error)
+
+	All() (res []models.Label, err error)
 }

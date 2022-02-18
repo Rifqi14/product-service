@@ -1,6 +1,8 @@
 package view_models
 
 import (
+	"strings"
+
 	"gitlab.com/s2.1-backend/shm-file-management-svc/domain/view_models"
 	"gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 )
@@ -61,15 +63,82 @@ type BrandLogVm struct {
 	Document *view_models.FileVm `json:"supporting_documment"`
 }
 
+type BrandExportVm struct {
+	Number          int    `json:"number"`
+	Name            string `json:"name"`
+	EstablishedDate string `json:"established_date"`
+	Title           string `json:"title"`
+	Catchphrase     string `json:"catchphrase"`
+	About           string `json:"about"`
+	Website         string `json:"website"`
+	Instagram       string `json:"instagram"`
+	Tiktok          string `json:"tiktok"`
+	Facebook        string `json:"facebook"`
+	Twitter         string `json:"twitter"`
+	Email           string `json:"email"`
+	Other           string `json:"other"`
+}
+
 type BrandVm struct {
-	Full   []BrandFullVm `json:"list_full_brand"`
-	List   []BrandListVm `json:"list_brand"`
-	Detail BrandDetailVm `json:"detail_brand"`
-	Logs   []BrandLogVm  `json:"log_brand"`
+	Full   []BrandFullVm   `json:"list_full_brand"`
+	List   []BrandListVm   `json:"list_brand"`
+	Detail BrandDetailVm   `json:"detail_brand"`
+	Logs   []BrandLogVm    `json:"log_brand"`
+	Export []BrandExportVm `json:"export_brand"`
 }
 
 func NewBrandVm() BrandVm {
 	return BrandVm{}
+}
+
+func (vm BrandVm) BuildExport(brands []models.Brand) (res []BrandExportVm, err error) {
+	if len(brands) > 0 {
+		for i, brand := range brands {
+			var export BrandExportVm
+			var website []string
+			var instagram []string
+			var tiktok []string
+			var facebook []string
+			var twitter []string
+			var email []string
+			var other []string
+			if len(brand.MediaSocials) > 0 {
+				for _, platform := range brand.MediaSocials {
+					switch platform.Type {
+					case "website":
+						website = append(website, platform.Link)
+					case "instagram":
+						instagram = append(instagram, platform.Link)
+					case "tiktok":
+						tiktok = append(tiktok, platform.Link)
+					case "facebook":
+						facebook = append(facebook, platform.Link)
+					case "twitter":
+						twitter = append(twitter, platform.Link)
+					case "email":
+						email = append(email, platform.Link)
+					default:
+						other = append(other, platform.Link)
+					}
+				}
+			}
+			export.Number = i + 1
+			export.Name = brand.Name
+			export.EstablishedDate = brand.EstablishedDate.Format("02/01/2006")
+			export.Title = brand.Title
+			export.Catchphrase = brand.Catchphrase
+			export.About = brand.About
+			export.Website = strings.Join(website, ", ")
+			export.Instagram = strings.Join(instagram, ", ")
+			export.Tiktok = strings.Join(tiktok, ", ")
+			export.Facebook = strings.Join(facebook, ", ")
+			export.Twitter = strings.Join(twitter, ", ")
+			export.Email = strings.Join(email, ", ")
+			export.Other = strings.Join(other, ", ")
+			res = append(res, export)
+		}
+	}
+	return res, nil
 }
 
 func (vm BrandVm) BuildFull(brands []models.Brand) (res []BrandFullVm) {

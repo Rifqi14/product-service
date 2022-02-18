@@ -116,5 +116,16 @@ func (handler GenderHandler) Delete(ctx *fiber.Ctx) (err error) {
 }
 
 func (handler GenderHandler) Export(ctx *fiber.Ctx) (err error) {
-	panic("Under development")
+	fileType := ctx.Query("type")
+	if !handlers.FileType(fileType).IsValid() {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
+	}
+
+	uc := v1.NewGenderUsecase(handler.UcContract)
+	res, err := uc.Export(fileType)
+	if err != nil {
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.DataNotFound, err)).Send(ctx)
+	}
+
+	return responses.NewResponse(responses.ResponseSuccess(res, nil, "data suuccess export")).Send(ctx)
 }

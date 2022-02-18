@@ -11,4 +11,6 @@ type IGenderRepository interface {
 	Detail(genderId uuid.UUID) (res models.Gender, err error)
 
 	Parent(parentId uuid.UUID) (res []models.Gender, err error)
+
+	All() (res []models.Gender, err error)
 }

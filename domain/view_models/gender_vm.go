@@ -19,6 +19,11 @@ type GenderParentVm struct {
 	Name string `json:"name"`
 }
 
+type GenderExportVm struct {
+	Name   string `json:"name"`
+	Parent string `json:"parent"`
+}
+
 type GenderVm struct {
 	List   GenderListVm   `json:"list_gender"`
 	Detail GenderDetailVm `json:"detail_gender"`
@@ -26,6 +31,18 @@ type GenderVm struct {
 
 func NewGenderVm() GenderVm {
 	return GenderVm{}
+}
+
+func (vm GenderVm) BuildExport(genders []models.Gender) (res []GenderExportVm) {
+	for _, gender := range genders {
+		var genderVm GenderExportVm
+		genderVm.Name = gender.Name
+		if gender.Parent != nil {
+			genderVm.Parent = gender.Parent.Name
+		}
+		res = append(res, genderVm)
+	}
+	return res
 }
 
 func (vm GenderVm) BuildList(genders []models.Gender) (res []GenderListVm) {
