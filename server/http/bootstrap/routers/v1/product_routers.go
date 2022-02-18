@@ -25,4 +25,5 @@ func (route ProductRouters) ProductRoute() {
 	productRoutes.Post("/status/:id", handler.ChangeStatus)
 	productRoutes.Patch("/:id", handler.Update)
 	productRoutes.Delete("/:id", handler.Delete)
+	productRoutes.Post("/export", handler.Export)
 }
