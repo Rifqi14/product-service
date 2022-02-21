@@ -30,7 +30,7 @@ func (repo ProductRepository) List(search, orderBy, sort, productName string, li
 		tx = tx.Where("id in ?", product)
 	}
 	if len(brand) > 0 {
-		tx = tx.Where("brand_id in ?", color)
+		tx = tx.Where("brand_id in ?", brand)
 	}
 	if minPrice > 0 && maxPrice > 0 {
 		tx = tx.Where("final_price between ? and ?", minPrice, maxPrice)
