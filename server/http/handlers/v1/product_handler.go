@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -30,6 +31,12 @@ func (handler ProductHandler) Create(ctx *fiber.Ctx) (err error) {
 	}
 	if err := handler.Validate.Struct(req); err != nil {
 		return responses.NewResponse(responses.ResponseErrorValidation(nil, nil, http.StatusBadRequest, "validation data error", err.(validator.ValidationErrors))).Send(ctx)
+	}
+	for _, variant := range req.Variants {
+		image := handlers.ValidateImage(variant)
+		if len(image) <= 0 {
+			return responses.NewResponse(responses.ResponseError(nil, nil, fiber.StatusBadRequest, "each variant at least need one image", errors.New("each variant at least need one image"))).Send(ctx)
+		}
 	}
 
 	uc := v1.NewProductUsecase(handler.UcContract)

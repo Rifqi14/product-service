@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"gitlab.com/s2.1-backend/shm-package-svc/jwe"
 	"gitlab.com/s2.1-backend/shm-package-svc/jwt"
+	"gitlab.com/s2.1-backend/shm-product-svc/domain/request"
 	"gitlab.com/s2.1-backend/shm-product-svc/usecase"
 	"gorm.io/gorm"
 )
@@ -54,4 +55,13 @@ func (pt PlatformType) IsValid() bool {
 		return true
 	}
 	return false
+}
+
+func ValidateImage(variants *request.VariantRequest) (res []string) {
+	for _, image := range variants.Images {
+		if image.ImageID != nil {
+			res = append(res, "not nil")
+		}
+	}
+	return res
 }

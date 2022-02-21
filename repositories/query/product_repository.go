@@ -30,7 +30,7 @@ func (repo ProductRepository) List(search, orderBy, sort, productName string, li
 		tx = tx.Where("id in ?", product)
 	}
 	if len(brand) > 0 {
-		tx = tx.Where("brand_id in ?", color)
+		tx = tx.Where("brand_id in ?", brand)
 	}
 	if minPrice > 0 && maxPrice > 0 {
 		tx = tx.Where("final_price between ? and ?", minPrice, maxPrice)
@@ -62,7 +62,7 @@ func (repo ProductRepository) Detail(productId uuid.UUID) (res *models.Product, 
 func (repo ProductRepository) FindBy(column, operator string, value interface{}) (res []*models.Product, err error) {
 	tx := repo.DB
 
-	err = tx.Preload(clause.Associations).Preload("Variants."+clause.Associations).Preload("Images."+clause.Associations).Preload("Logs."+clause.Associations).Preload("Brand."+clause.Associations).Preload("Categories."+clause.Associations).Find(&res, column+" "+operator+" ?", value).Error
+	err = tx.Preload(clause.Associations).Preload("Variants.Color."+clause.Associations).Preload("Images."+clause.Associations).Preload("Logs."+clause.Associations).Preload("Brand."+clause.Associations).Preload("Categories."+clause.Associations).Find(&res, column+" "+operator+" ?", value).Error
 	if err != nil {
 		return nil, err
 	}
