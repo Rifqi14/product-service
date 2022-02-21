@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -94,12 +95,20 @@ func (handler ProductHandler) List(ctx *fiber.Ctx) (err error) {
 func (handler ProductHandler) Detail(ctx *fiber.Ctx) (err error) {
 	productId, err := uuid.Parse(ctx.Params("id"))
 	if err != nil {
+		fmt.Println(err)
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.UserNotFound, err)).Send(ctx)
 	}
+
+	// isPublic := strings.Contains(ctx.Path(), "/product/v1/product/public")
+
+	// if isPublic {
+	// 	return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
+	// }
 
 	uc := v1.NewProductUsecase(handler.UcContract)
 	data, err := uc.Detail(productId)
 	if err != nil {
+		fmt.Println(err)
 		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusUnprocessableEntity, messages.DataNotFound, err)).Send(ctx)
 	}
 
