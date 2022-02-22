@@ -6,10 +6,18 @@ import (
 )
 
 type CategoryListVm struct {
-	Parent string             `json:"parent_category"`
-	Child  string             `json:"child_category"`
-	Banner view_models.FileVm `json:"banner"`
-	ID     string             `json:"category_id"`
+	ID             string             `json:"category_id"`
+	Parent         string             `json:"parent_category"`
+	Child          string             `json:"child_category"`
+	Banner         view_models.FileVm `json:"banner"`
+	CategoryBanner CategoryBannerVm   `json:"category_banner"`
+}
+
+type CategoryBannerVm struct {
+	MobileBanner      view_models.FileVm `json:"mobile_banner"`
+	WebsiteBanner     view_models.FileVm `json:"website_banner"`
+	MobileHeroBanner  view_models.FileVm `json:"mobile_hero_banner"`
+	WebsiteHeroBanner view_models.FileVm `json:"website_hero_banner"`
 }
 
 type CategoryDetailVm struct {
@@ -65,6 +73,7 @@ func (vm CategoryVm) BuildExport(categories []models.Category) (res []CategoryEx
 func (vm CategoryVm) BuildList(categories []models.Category) (res []CategoryListVm) {
 	for _, category := range categories {
 		var banner view_models.FileVm
+		var categoryBanner CategoryBannerVm
 		var parent string
 		if category.MobileBanner != nil {
 			banner = view_models.NewFileVm().Build(*category.MobileBanner)
@@ -72,11 +81,24 @@ func (vm CategoryVm) BuildList(categories []models.Category) (res []CategoryList
 		if category.Parent != nil {
 			parent = category.Parent.Name
 		}
+		if category.MobileBanner != nil {
+			categoryBanner.MobileBanner = view_models.NewFileVm().Build(*category.MobileBanner)
+		}
+		if category.WebsiteBanner != nil {
+			categoryBanner.WebsiteBanner = view_models.NewFileVm().Build(*category.WebsiteBanner)
+		}
+		if category.MobileHeroBanner != nil {
+			categoryBanner.MobileHeroBanner = view_models.NewFileVm().Build(*category.MobileHeroBanner)
+		}
+		if category.WebsiteHeroBanner != nil {
+			categoryBanner.WebsiteHeroBanner = view_models.NewFileVm().Build(*category.WebsiteHeroBanner)
+		}
 		res = append(res, CategoryListVm{
-			ID:     category.ID.String(),
-			Parent: parent,
-			Child:  category.Name,
-			Banner: banner,
+			ID:             category.ID.String(),
+			Parent:         parent,
+			Child:          category.Name,
+			Banner:         banner,
+			CategoryBanner: categoryBanner,
 		})
 	}
 	return res
