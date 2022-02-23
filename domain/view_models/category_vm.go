@@ -7,6 +7,7 @@ import (
 
 type CategoryListVm struct {
 	ID             string             `json:"category_id"`
+	ParentID       string             `json:"parent_id"`
 	Parent         string             `json:"parent_category"`
 	Child          string             `json:"child_category"`
 	Banner         view_models.FileVm `json:"banner"`
@@ -95,6 +96,7 @@ func (vm CategoryVm) BuildList(categories []models.Category) (res []CategoryList
 		}
 		res = append(res, CategoryListVm{
 			ID:             category.ID.String(),
+			ParentID:       category.ParentID.String(),
 			Parent:         parent,
 			Child:          category.Name,
 			Banner:         banner,
