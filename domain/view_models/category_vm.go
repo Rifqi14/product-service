@@ -76,6 +76,10 @@ func (vm CategoryVm) BuildList(categories []models.Category) (res []CategoryList
 		var banner view_models.FileVm
 		var categoryBanner CategoryBannerVm
 		var parent string
+		var parentId string
+		if category.ParentID != nil {
+			parentId = category.ParentID.String()
+		}
 		if category.MobileBanner != nil {
 			banner = view_models.NewFileVm().Build(*category.MobileBanner)
 		}
@@ -96,7 +100,7 @@ func (vm CategoryVm) BuildList(categories []models.Category) (res []CategoryList
 		}
 		res = append(res, CategoryListVm{
 			ID:             category.ID.String(),
-			ParentID:       category.ParentID.String(),
+			ParentID:       parentId,
 			Parent:         parent,
 			Child:          category.Name,
 			Banner:         banner,
