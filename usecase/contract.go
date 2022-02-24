@@ -97,7 +97,7 @@ func (uc Contract) SetPaginationResponse(page, limit, total int64) (res view_mod
 }
 
 func (uc Contract) OpenFile(f string) (file *os.File, err error) {
-	r, err := os.Open("../../domain/files/" + f)
+	r, err := os.Open(f)
 	if err != nil {
 		return nil, err
 	}
