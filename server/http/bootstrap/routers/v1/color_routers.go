@@ -18,10 +18,10 @@ func (route ColorRouters) ColorRoute() {
 
 	colorRoutes := route.RouteGroup.Group("/color")
 	colorRoutes.Get("", handler.List)
+	colorRoutes.Get("/export", handler.Export)
 	colorRoutes.Get("/:id", handler.Detail)
 	colorRoutes.Use(jwtMiddleware.New)
 	colorRoutes.Post("", handler.Create)
 	colorRoutes.Patch("/:id", handler.Update)
 	colorRoutes.Delete("/:id", handler.Delete)
-	colorRoutes.Post("/export", handler.Export)
 }
