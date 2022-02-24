@@ -3,11 +3,12 @@ package view_models
 import "gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 
 type ColorListVm struct {
-	No     int64  `json:"no"`
-	Parent string `json:"parent"`
-	Child  string `json:"child"`
-	Hex    string `json:"hex"`
-	ID     string `json:"color_id"`
+	No       int64  `json:"no"`
+	ParentID string `json:"parent_id"`
+	Parent   string `json:"parent"`
+	Child    string `json:"child"`
+	Hex      string `json:"hex"`
+	ID       string `json:"color_id"`
 }
 
 type ColorDetailVm struct {
@@ -54,15 +55,18 @@ func (vm ColorVm) BuildExport(colors []models.Color) (res []ColorExportVm) {
 func (vm ColorVm) BuildList(colors []models.Color) (res []ColorListVm) {
 	for i, color := range colors {
 		var parent string
+		var parent_id string
 		if color.Parent != nil {
 			parent = color.Parent.Name
+			parent_id = color.Parent.ID.String()
 		}
 		res = append(res, ColorListVm{
-			No:     int64(i + 1),
-			Parent: parent,
-			Child:  color.Name,
-			Hex:    color.RgbCode,
-			ID:     color.ID.String(),
+			No:       int64(i + 1),
+			ParentID: parent_id,
+			Parent:   parent,
+			Child:    color.Name,
+			Hex:      color.RgbCode,
+			ID:       color.ID.String(),
 		})
 	}
 	return res
