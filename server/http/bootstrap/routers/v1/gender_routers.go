@@ -18,10 +18,10 @@ func (route GenderRouters) GenderRoute() {
 
 	genderRoutes := route.RouteGroup.Group("/gender")
 	genderRoutes.Get("", handler.List)
+	genderRoutes.Get("/export", handler.Export)
 	genderRoutes.Get("/:id", handler.Detail)
 	genderRoutes.Use(jwtMiddleware.New)
 	genderRoutes.Post("", handler.Create)
 	genderRoutes.Patch("/:id", handler.Update)
 	genderRoutes.Delete("/:id", handler.Delete)
-	genderRoutes.Get("/export", handler.Export)
 }
