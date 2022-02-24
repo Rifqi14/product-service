@@ -22,12 +22,7 @@ func (repo GenderRepository) List(search, orderBy, sort string, limit, offset in
 	tx := repo.DB
 	search = strings.ToLower(search)
 
-	err = tx.Joins("LEFT JOIN genders as parent on parent.id = genders.parent_id").Where("lower(genders.name) like ? or lower(parent.name) like ?", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Error
-	if err != nil {
-		return res, count, err
-	}
-
-	err = tx.Joins("LEFT JOIN genders as parent on parent.id = genders.parent_id").Where("lower(genders.name) like ? or lower(parent.name) like ?", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Find(&models.Gender{}).Count(&count).Error
+	err = tx.Joins("LEFT JOIN genders as parent on parent.id = genders.parent_id").Where("lower(genders.name) like ? or lower(parent.name) like ?", "%"+search+"%", "%"+search+"%").Preload(clause.Associations).Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Limit(-1).Count(&count).Error
 	if err != nil {
 		return res, count, err
 	}
