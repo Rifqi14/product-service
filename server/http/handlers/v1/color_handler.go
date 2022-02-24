@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -113,7 +114,7 @@ func (handler ColorHandler) Delete(ctx *fiber.Ctx) (err error) {
 func (handler ColorHandler) Export(ctx *fiber.Ctx) (err error) {
 	fileType := ctx.Query("type")
 	if !handlers.FileType(fileType).IsValid() {
-		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, err)).Send(ctx)
+		return responses.NewResponse(responses.ResponseError(nil, nil, http.StatusBadRequest, messages.FailedLoadPayload, errors.New("Type not valid"))).Send(ctx)
 	}
 
 	uc := v1.NewColorUsecase(handler.UcContract)

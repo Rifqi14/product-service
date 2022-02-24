@@ -23,5 +23,5 @@ func (route ColorRouters) ColorRoute() {
 	colorRoutes.Post("", handler.Create)
 	colorRoutes.Patch("/:id", handler.Update)
 	colorRoutes.Delete("/:id", handler.Delete)
-	colorRoutes.Get("/export", handler.Export)
+	colorRoutes.Post("/export", handler.Export)
 }
