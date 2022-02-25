@@ -21,8 +21,8 @@ func (route MaterialRouters) MaterialRoute() {
 	categoryRoutes := materialRoutes.Group("/category")
 	materialRoutes.Get("", handlerMaterial.List)
 	categoryRoutes.Get("", handlerMaterialCat.List)
-	categoryRoutes.Get("/export", handlerMaterialCat.Export)
 	materialRoutes.Get("/export", handlerMaterial.Export)
+	categoryRoutes.Get("/export", handlerMaterialCat.Export)
 	materialRoutes.Get("/:id", handlerMaterial.Detail)
 	categoryRoutes.Get("/:id", handlerMaterialCat.Detail)
 
