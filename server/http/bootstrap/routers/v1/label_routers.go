@@ -18,10 +18,10 @@ func (route LabelRouters) LabelRoute() {
 
 	labelRoutes := route.RouteGroup.Group("/label")
 	labelRoutes.Get("", handler.List)
+	labelRoutes.Get("/export", handler.Export)
 	labelRoutes.Get("/:id", handler.Detail)
 	labelRoutes.Use(jwtMiddleware.New)
 	labelRoutes.Post("", handler.Create)
 	labelRoutes.Patch("/:id", handler.Update)
 	labelRoutes.Delete("/:id", handler.Delete)
-	labelRoutes.Get("/export", handler.Export)
 }
