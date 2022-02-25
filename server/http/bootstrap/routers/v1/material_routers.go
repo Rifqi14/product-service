@@ -21,6 +21,8 @@ func (route MaterialRouters) MaterialRoute() {
 	categoryRoutes := materialRoutes.Group("/category")
 	materialRoutes.Get("", handlerMaterial.List)
 	categoryRoutes.Get("", handlerMaterialCat.List)
+	categoryRoutes.Get("/export", handlerMaterialCat.Export)
+	materialRoutes.Get("/export", handlerMaterial.Export)
 	materialRoutes.Get("/:id", handlerMaterial.Detail)
 	categoryRoutes.Get("/:id", handlerMaterialCat.Detail)
 
@@ -28,9 +30,7 @@ func (route MaterialRouters) MaterialRoute() {
 	materialRoutes.Post("", handlerMaterial.Create)
 	materialRoutes.Patch("/:id", handlerMaterial.Update)
 	materialRoutes.Delete("/:id", handlerMaterial.Delete)
-	materialRoutes.Post("/export", handlerMaterial.Export)
 	categoryRoutes.Post("", handlerMaterialCat.Create)
 	categoryRoutes.Patch("/:id", handlerMaterialCat.Update)
 	categoryRoutes.Delete("/:id", handlerMaterialCat.Delete)
-	categoryRoutes.Post("/export", handlerMaterialCat.Export)
 }
