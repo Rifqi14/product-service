@@ -3,9 +3,10 @@ package view_models
 import "gitlab.com/s2.1-backend/shm-product-svc/domain/models"
 
 type MaterialListVm struct {
-	Parent string `json:"parent"`
-	Child  string `json:"child"`
-	ID     string `json:"material_id"`
+	Category string `json:"material_category"`
+	Parent   string `json:"parent"`
+	Child    string `json:"child"`
+	ID       string `json:"material_id"`
 }
 
 type MaterialDetailVm struct {
@@ -52,13 +53,18 @@ func (vm MaterialVm) BuildExport(materials []models.Material) (res []MaterialExp
 func (vm MaterialVm) BuildList(materials []models.Material) (res []MaterialListVm) {
 	for _, material := range materials {
 		var parent string
+		var category string
 		if material.Parent != nil {
 			parent = material.Parent.Name
 		}
+		if material.Category.Name != "" {
+			category = material.Category.Name
+		}
 		res = append(res, MaterialListVm{
-			Parent: parent,
-			Child:  material.Name,
-			ID:     material.ID.String(),
+			Category: category,
+			Parent:   parent,
+			Child:    material.Name,
+			ID:       material.ID.String(),
 		})
 	}
 	return res
