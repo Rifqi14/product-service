@@ -142,26 +142,26 @@ func (uc MaterialUsecase) Update(req *request.MaterialRequest, materialId uuid.U
 		return res, err
 	}
 
-	var dataPath []string
-	path, err := uc.createPath(&material.ID, dataPath)
-	if err != nil {
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-material")
-		return res, err
-	}
-	material.Path = strings.Join(path, " / ")
-	material.Level = int64(len(path))
-	err = tx.Updates(&material).Error
-	if err != nil {
-		tx.Rollback()
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-material")
-		return res, err
-	}
-	err = uc.updatePath(material.ID)
-	if err != nil {
-		tx.Rollback()
-		logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-transaction")
-		return res, err
-	}
+	// var dataPath []string
+	// path, err := uc.createPath(&material.ID, dataPath)
+	// if err != nil {
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-createPath-material")
+	// 	return res, err
+	// }
+	// material.Path = strings.Join(path, " / ")
+	// material.Level = int64(len(path))
+	// err = tx.Updates(&material).Error
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "query-updatePath-material")
+	// 	return res, err
+	// }
+	// err = uc.updatePath(material.ID)
+	// if err != nil {
+	// 	tx.Rollback()
+	// 	logruslogger.Log(logruslogger.WarnLevel, err.Error(), functioncaller.PrintFuncName(), "uc-updatePath-transaction")
+	// 	return res, err
+	// }
 
 	tx.Commit()
 	res, _ = uc.Detail(material.ID)

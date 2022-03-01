@@ -25,7 +25,7 @@ func (repo MaterialRepository) Create(material models.Material) (res models.Mate
 
 func (repo MaterialRepository) Update(material models.Material) (res models.Material, err error) {
 	tx := repo.DB
-	err = tx.Preload("Parent.Parent.Parent").Updates(&material).Error
+	err = tx.Updates(&material).Error
 	if err != nil {
 		return res, err
 	}
