@@ -22,10 +22,11 @@ func (repo BrandRepository) List(search, orderBy, sort string, limit, offset int
 	db := repo.DB
 	search = strings.ToLower(search)
 
-	err = db.Preload(clause.Associations).Preload("Logs."+clause.Associations).Where("LOWER(brands.name) like ?", "%"+search+"%").Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Limit(-1).Count(&count).Error
+	err = db.Preload(clause.Associations).Preload("Logs."+clause.Associations).Where("LOWER(brands.name) like ?", "%"+search+"%").Order(orderBy + " " + sort).Limit(int(limit)).Offset(int(offset)).Find(&res).Error
 	if err != nil {
 		return res, count, err
 	}
+	err = db.Where("lower(brands.name) like ?", "%"+search+"%").Order(orderBy + " " + sort).Find(&models.Brand{}).Count(&count).Error
 	if err != nil {
 		return res, count, err
 	}
