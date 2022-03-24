@@ -10,7 +10,7 @@ import (
 type ProductVariant struct {
 	ProductID uuid.UUID `gorm:"type:uuid;not null;primaryKey"`
 	ColorID   uuid.UUID `gorm:"type:uuid;not null;primaryKey"`
-	Size      int64     `gorm:"primaryKey;type:numeric"`
+	Size      string    `gorm:"primaryKey;type:numeric"`
 	Stock     int64
 	Sku       *string
 	Status    bool

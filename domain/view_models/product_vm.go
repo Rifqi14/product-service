@@ -39,7 +39,7 @@ type ProductVm struct {
 
 type ProductVariantVm struct {
 	Colors    *ColorDetailVm `json:"colors"`
-	Size      int64          `json:"size"`
+	Size      string         `json:"size"`
 	Stock     int64          `json:"stock"`
 	Sku       string         `json:"sku"`
 	Status    bool           `json:"status"`
@@ -126,7 +126,7 @@ func (vm BuildProductVm) BuildExport(products []models.Product) (res []ProductEx
 			productVm.StripePrice = strconv.Itoa(int(product.StripePrice))
 			productVm.Discount = strconv.Itoa(int(product.DiscountPrice))
 			productVm.Color = variant.Color.Name
-			productVm.Size = strconv.Itoa(int(variant.Size))
+			productVm.Size = variant.Size
 			productVm.Stock = strconv.Itoa(int(variant.Stock))
 			productVm.SKU = *variant.Sku
 			if product.Description != nil {

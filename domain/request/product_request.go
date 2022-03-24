@@ -9,8 +9,8 @@ type ProductRequest struct {
 	Labels           []*uuid.UUID             `form:"labels" json:"labels"`
 	Materials        []*uuid.UUID             `form:"materials" json:"materials"`
 	Gender           []*uuid.UUID             `form:"genders" json:"genders"`
-	NormalPrice      int64                    `form:"normal_price" json:"normal_price" validate:"ltfield=StripePrice,required"`
-	StripePrice      int64                    `form:"stripe_price" json:"stripe_price" validate:"gtfield=NormalPrice,required"`
+	NormalPrice      int64                    `form:"normal_price" json:"normal_price" validate:"required"`
+	StripePrice      int64                    `form:"stripe_price" json:"stripe_price" validate:"required"`
 	Discount         int64                    `form:"discount" json:"discount" validate:"ltfield=StripePrice,required"`
 	Variants         []*VariantRequest        `form:"variants" json:"variants"`
 	Description      *string                  `form:"description" json:"description"`
@@ -31,7 +31,7 @@ type VariantImagesRequest struct {
 }
 
 type VariantDetailRequest struct {
-	Size   int64  `form:"size" json:"size"`
+	Size   string `form:"size" json:"size"`
 	Stock  int64  `form:"stock" json:"stock"`
 	Sku    string `form:"sku" json:"sku"`
 	Status bool   `form:"status" json:"status"`
@@ -45,7 +45,7 @@ type PackageDimensionRequest struct {
 
 type PreOrderRequest struct {
 	Status      bool  `form:"status" json:"status"`
-	PreOrderDay int64 `form:"po_day" json:"po_day" validate:"required_if=Status false,lte=30"`
+	PreOrderDay int64 `form:"po_day" json:"po_day" validate:"lte=30"`
 }
 
 type FilterProductRequest struct {
